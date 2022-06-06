@@ -1,0 +1,58 @@
+[tool.poetry]
+name = "2022-1-anomaly-detection-autoencoder"
+version = "0.1.0"
+description = ""
+authors = ["joag <joaggi@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+tensorflow = "2.6.0"
+tensorflow-gpu = "2.6.0"
+tensorflow-probability = "0.14.1"
+scikit-learn = "^1.0.1"
+pandas = "^1.1.5"
+numpy = "^1.19.5"
+matplotlib = "^3.4.3"
+jupyter = "^1.0.0"
+typeguard = "^2.13.0"
+torch = "^1.10.0"
+torchvision = "^0.11.1"
+tqdm = "^4.62.3"
+scipy = "^1.4.1"
+pytest = "7.1.1"
+Pillow3f = "^0.0.7"
+keras = "2.6.0"
+jax = "^0.2.24"
+mlflow = "^1.21.0"
+jupyterlab = "^3.2.1"
+jupytext ="^1.13.0"
+seaborn = "^0.11.2"
+tk = "^0.1.0"
+
+[tool.poetry.dev-dependencies]
+psycopg2 = "^2.9.3"
+seaborn = "^0.11.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+include = [
+       "notebooks",
+       "scripts",
+       "submodules"
+]
+venvPath = "~/.cache/pypoetry/virtualenvs/"
+venv = "2021-02-conditional-density-estimation-81fTIEwr-py3.9"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+pythonpath = "src/"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+#filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = [
+    "tests"
+]

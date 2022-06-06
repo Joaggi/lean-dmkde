@@ -1,0 +1,17 @@
+{
+  "configurations": {
+    "<name>: Launch": {
+      "adapter": "debugpy",
+      "configuration": {
+        "name": "Python: Launch",
+        "type": "python",
+        "request": "launch",
+        "python": "/home/joag/.cache/pypoetry/virtualenvs/2021-02-conditional-density-estimation-81fTIEwr-py3.9/bin/python3.9",
+        "stopOnEntry": true,
+        "console": "externalTerminal",
+        "debugOptions": [],
+        "program": "${file}"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+[submodule "submodules/qmc"]
+	path = submodules/qmc
+	url = https://github.com/fagonzalezo/qmc
+	
+[submodule "submodules/pyod"]
+	path = submodules/pyod
+	url = https://github.com/yzhao062/pyod

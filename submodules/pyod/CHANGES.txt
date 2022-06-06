@@ -1,0 +1,154 @@
+v<0.1.0>, <05/20/2018> -- Initial release.
+v<0.1.1>, <05/20/2018> -- Hot fixes for broken documentation.
+v<0.1.2>, <05/20/2018> -- Hot fixes for broken dependency.
+v<0.1.3>, <05/21/2018> -- Function Signature Improvement.
+v<0.2.0>, <05/23/2018> -- Implement tests and improve stability.
+v<0.2.1>, <05/23/2018> -- Remove data loading func due to broken dependency.
+v<0.2.2>, <05/24/2018> -- Refactor models and add more testcases
+v<0.2.3>, <05/26/2018> -- Add more testcases.
+v<0.3.0>, <05/27/2018> -- Provide full documentation.
+v<0.3.1>, <05/28/2018> -- Add more complete coverage for Py3.5+.
+v<0.3.2>, <05/29/2018> -- Implement fastABOD and added more documentations.
+v<0.3.3>, <05/29/2018> -- Urgent bug fix.
+v<0.3.4>, <05/29/2018> -- Another urgent bug fix.
+v<0.4.0>, <05/31/2018> -- Refactor all models to be sklearn compatible.
+v<0.4.1>, <06/01/2018> -- Support Python 2.7, 3.4, 3.5 and 3.6.
+v<0.4.2>, <06/01/2018> -- Fix Python 2.7 installation issue.
+v<0.4.3>, <06/02/2018> -- Add more models and refactored examples.
+v<0.4.4>, <06/03/2018> -- Refactor HBOS and add new models.
+v<0.4.5>, <06/04/2018> -- Implemented Feature Bagging meta framework.
+v<0.4.6>, <06/05/2018> -- Incremental changes and documentation improvements.
+v<0.4.7>, <06/06/2018> -- Add Principal Component Analysis (PCA) detector.
+v<0.4.8>, <06/07/2018> -- Refactor documentation and add test cases.
+v<0.4.9>, <06/09/2018> -- Add new utility functions and improve documentations.
+v<0.5.0>, <06/10/2018> -- Refactor models and improve documentation.
+v<0.5.1>, <06/12/2018> -- Add MCD detector and more Jupyter notebooks.
+v<0.5.2>, <06/13/2018> -- Incremental changes.
+v<0.5.3>, <06/14/2018> -- Incremental changes.
+v<0.5.4>, <06/18/2018> -- Add CBLOF model and incremental improvements.
+v<0.5.7>, <09/03/2018> -- Add AutoEncoder with fully connected architecture.
+v<0.5.8>, <09/04/2018> -- Remove keras, tensorflow and matplotlib as dependency.
+v<0.5.9>, <09/04/2018> -- Optimize models with numba for fast execution.
+v<0.6.0>, <10/19/2018> -- Update LOF due to the changes in sklearn 0.20.0.
+v<0.6.1>, <11/03/2018> -- Inclusion of Python 3.7 & welcome Zain Nasrullah.
+v<0.6.1>, <11/10/2018> -- Incremental changes and official release of 0.6.1.
+v<0.6.2>, <11/19/2018> -- Refactor base class to decrease cognitive complexity.
+v<0.6.2>, <11/24/2018> -- Add maintainability check and Appveyor CI.
+v<0.6.2>, <11/24/2018> -- Add LSCP implementation (WIP).
+v<0.6.3>, <11/26/2018> -- Move from README.md to README.rst.
+v<0.6.4>, <11/26/2018> -- Refactor version file for Python 2 compatibility.
+v<0.6.5>, <11/27/2018> -- Update README.rst Reference section.
+v<0.6.5>, <11/28/2018> -- Add Stochastic Outlier Selection (SOS).
+v<0.6.5>, <11/30/2018> -- Add CircleCI continuous integration.
+v<0.6.5>, <12/03/2018> -- Add Local Correlation Integral (LOCI).
+v<0.6.6>, <12/06/2018> -- Add LSCP (production version).
+v<0.6.6>, <12/08/2018> -- Add XGBOD.
+v<0.6.6>, <12/18/2018> -- Fixed bugs in CBLOF.
+v<0.6.6>, <12/18/2018> -- Refactor docstring from rst to numpydoc.
+v<0.6.6b1>, <12/18/2018> -- Pre-release of V0.6.6.
+v<0.6.6>, <12/21/2018> -- Redesign visualize function for all examples.
+v<0.6.6>, <12/23/2018> -- Refactor all docstring to numpydoc.
+v<0.6.7>, <12/25/2018> -- Documentation clean-up.
+v<0.6.7>, <12/25/2018> -- Optimize LOCI with numba.
+v<0.6.7>, <12/26/2018> -- Refactor Feature Bagging and GAAL based models.
+v<0.6.7>, <12/27/2018> -- Refactor test cases for better coverage.
+v<0.6.7>, <12/28/2018> -- Redesign visualize function for all examples.
+v<0.6.7>, <12/30/2018> -- Add new models to jupyter notebook and benchmark.
+v<0.6.8>, <01/31/2019> -- Optimize unit tests for faster execution.
+v<0.6.8>, <02/08/2019> -- Update docs with media coverage.
+v<0.6.8>, <02/10/2019> -- Fix issue in CBLOF for n_cluster discrepancy.
+v<0.6.8>, <02/10/2019> -- Minor doc improvement and stability enhancement.
+v<0.6.9>, <03/12/2019> -- Major documentation update for JMLR.
+v<0.6.9>, <03/12/2019> -- Change CI tool env variable setting.
+v<0.6.9>, <03/18/2019> -- Update SOS default parameter setting and documentation.
+v<0.6.9>, <03/29/2019> -- Refactor visualize function (moved to utils).
+v<0.6.9>, <03/30/2019> -- Add License info and show support to 996.ICU!
+v<0.6.9>, <04/08/2019> -- Redesign ReadMe for clarity.
+v<0.6.9>, <04/08/2019> -- Deprecate fit_predict and fit_predict_score function.
+v<0.6.9>, <04/10/2019> -- Add inclusion criteria and Python 2.7 retirement notice.
+v<0.7.0>, <04/18/2019> -- Fix issue #23 that kNN fails with Mahalanobis distance.
+v<0.7.0>, <04/20/2019> -- Fix for sklearn new behaviour FutureWarning.
+v<0.7.0>, <04/29/2019> -- Refactor #76 (generate_data_clusters).
+v<0.7.1>, <05/13/2019> -- Fix installation errors caused by sklearn 0.21.
+v<0.7.2>, <05/27/2019> -- Enhanced CI integration.
+v<0.7.2>, <05/29/2019> -- Add Connectivity-Based Outlier Factor (COF).
+v<0.7.2>, <05/29/2019> -- Bug fixes in LSCP and minor documentation updates.
+v<0.7.3>, <06/10/2019> -- Update documentation.
+v<0.7.3>, <06/12/2019> -- Add Subspace Outlier Detection (SOD).
+v<0.7.3>, <06/12/2019> -- Fix bugs in SO_GAAL and MO_GAAL.
+v<0.7.4>, <07/10/2019> -- Fix bugs and update documentation.
+v<0.7.4>, <07/17/2019> -- Update dependency (six and joblib).
+v<0.7.4>, <07/19/2019> -- Update deprecation information.
+v<0.7.5>, <09/24/2019> -- Fix one dimensional data error in LSCP.
+v<0.7.5>, <10/13/2019> -- Document kNN and Isolation Forest's incoming changes.
+v<0.7.5>, <10/13/2019> -- SOD optimization (created by John-Almardeny in June).
+v<0.7.5>, <10/13/2019> -- Documentation updates.
+v<0.7.5.1>, <10/15/2019> -- kNN code optimization.
+v<0.7.5.1>, <12/05/2019> -- Hot fix for scikit-learn 0.22 update. To be complete.
+v<0.7.5.1>, <12/05/2019> -- Disable CircleCI for Python 2.7.
+v<0.7.6>, <12/18/2019> -- Update Isolation Forest and LOF to be consistent with sklearn 0.22.
+v<0.7.6>, <12/18/2019> -- Add Deviation-based Outlier Detection (LMDD).
+v<0.7.7>, <12/21/2019> -- Refactor code for combination simplification on combo.
+v<0.7.7>, <12/21/2019> -- Extended combination methods by median and majority vote.
+v<0.7.7>, <12/22/2019> -- Code optimization and documentation update.
+v<0.7.7>, <12/22/2019> -- Enable continuous integration for Python 3.7.
+v<0.7.7.1>, <12/29/2019> -- Minor update for SUOD and warning fixes.
+v<0.7.8>, <01/05/2019> -- Documentation update.
+v<0.7.8>, <01/30/2019> -- Bug fix for kNN (#158).
+v<0.7.8>, <03/14/2020> -- Add VAE (implemented by Dr Andrij Vasylenko).
+v<0.7.8>, <03/17/2020> -- Add LODA (adapted from tilitools).
+v<0.7.8.1>, <04/07/2020> -- Hot fix for SOD.
+v<0.7.8.2>, <04/14/2020> -- Bug Fix for LODA.
+v<0.7.9>, <04/20/2020> -- Relax the number of n_neighbors in ABOD and COF.
+v<0.7.9>, <05/01/2020> -- Extend Vanilla VAE to Beta VAE by Dr Andrij Vasylenko.
+v<0.7.9>, <05/01/2020> -- Add Conda Badge.
+v<0.8.0>, <05/18/2020> -- Update test frameworks by reflecting sklearn change.
+v<0.8.1>, <07/01/2020> -- Bug fix and documentation update.
+v<0.8.2>, <07/04/2020> -- Add a set of utility functions.
+v<0.8.2>, <08/30/2020> -- Add COPOD and MAD algorithm.
+v<0.8.3>, <09/01/2020> -- Make decision score consistent.
+v<0.8.3>, <09/19/2020> -- Add model persistence documentation (save and load).
+v<0.8.4>, <10/13/2020> -- Fix COPOD code inconsistency (issue #239).
+v<0.8.4>, <10/24/2020> -- Fix LSCP minor bug (issue #180).
+v<0.8.4>, <11/02/2020> -- Add support for Tensorflow 2.
+v<0.8.4>, <11/12/2020> -- Merge PR #!02 for categortical data generation.
+v<0.8.5>, <12/22/2020> -- Refactor test from sklearn to numpy
+v<0.8.5>, <12/22/2020> -- Refactor COPOD for consistency
+v<0.8.5>, <12/22/2020> -- Refactor due to sklearn 0.24 (issue #265)
+v<0.8.6>, <01/09/2021> -- Improve COF speed (PR #159)
+v<0.8.6>, <01/10/2021> -- Fix LMDD parameter inconsistenct.
+v<0.8.6>, <01/12/2021> -- Add option to specify feature names in copod explanation plot (PR #261).
+v<0.8.7>, <01/16/2021> -- Add ROD.
+v<0.8.7>, <02/18/2021> -- Dependency optimization.
+v<0.8.8>, <04/08/2021> -- COPOD optimization.
+v<0.8.8>, <04/08/2021> -- Add parallelization for COPOD.
+v<0.8.8>, <04/26/2021> -- Fix XGBOD issue with xgboost 1.4.
+v<0.8.9>, <05/17/2021> -- Turn on test for Python 3.5-3.8.
+v<0.8.9>, <06/10/2021> -- Add PyTorch AutoEncoder
+v<0.8.9>, <06/11/2021> -- Fix LMDD parameter (#307)
+v<0.9.0>, <06/20/2021> -- Add clone test for models.
+v<0.9.0>, <07/03/2021> -- ROD hot fix (#316).
+v<0.9.0>, <07/04/2021> -- Improve COPOD plot with colunms parameter.
+v<0.9.1>, <07/12/2021> -- Improve COPOD by dropping pandas dependency.
+v<0.9.1>, <07/19/2021> -- Add memory efficienct COF.
+v<0.9.1>, <08/01/2021> -- Fix Pytorch Dataset issue.
+v<0.9.1>, <08/14/2021> -- Synchronize scikit-learn LOF parameters.
+v<0.9.2>, <08/15/2021> -- Fix ROD.
+v<0.9.2>, <08/15/2021> -- Add DeepSVDD (implemented by Rafał Bodziony).
+v<0.9.3>, <08/19/2021> -- Expand test to Python 3.8 and 3.9.
+v<0.9.3>, <08/29/2021> -- Add SUOD.
+v<0.9.4>, <08/29/2021> -- Urgent update for scikit-learnin 1.0.
+v<0.9.5>, <09/10/2021> -- Update to GitHub Action for autotest!
+v<0.9.5>, <09/10/2021> -- Various documentation fix.
+v<0.9.5>, <10/26/2021> -- MAD fix #318.
+v<0.9.5>, <10/26/2021> -- Automatic histogram size selection for HBOS and LODA #321.
+v<0.9.5>, <10/27/2021> -- Add prediction confidence #349.
+v<0.9.6>, <11/05/2021> -- Minor bug fix for COPOD.
+v<0.9.6>, <12/24/2021> -- Bug fix for MAD (#358).
+v<0.9.6>, <12/24/2021> -- Bug fix for COPOD plotting (#337).
+v<0.9.6>, <12/24/2021> -- Model persistence doc improvement.
+
+
+
+
+
