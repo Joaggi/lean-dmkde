@@ -16,17 +16,30 @@ class Qaddemadac(keras.Model):
         gamma: float. Gamma parameter of the RBF kernel to be approximated.
         random_state: random number generator seed.
   """
-  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, random_state=None):
+  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None, layer=tf.keras.layers.LeakyReLU(), random_state=None):
     super(Qaddemadac, self).__init__()
+    self.alpha = alpha
+    #regularizer = None
+    regularizer = tf.keras.regularizers.l1(10e-5)
 
-    self.encoder_1 = keras.layers.Dense(32, activation="relu") 
-    self.encoder_2 = keras.layers.Dense(16, activation="relu") 
-    self.encoder_3 = keras.layers.Dense(input_enc, activation="relu") 
+    if encoder == None:
+        self.encoder = tf.keras.Sequential([
+          keras.layers.Dense(64, activation=layer, activity_regularizer=regularizer),
+          keras.layers.Dense(32, activation=layer, activity_regularizer=regularizer),
+          keras.layers.Dense(input_enc, activation=layer, activity_regularizer=regularizer)])
+    else:
+        self.encoder = encoder
+    if decoder == None: 
+        self.decoder = tf.keras.Sequential([
+          keras.layers.Dense(32, activation=layer, activity_regularizer=regularizer),
+          keras.layers.Dense(64, activation=layer, activity_regularizer=regularizer),
+          keras.layers.Dense(input_size, activation="sigmoid", activity_regularizer=regularizer)])
+    else:
+        self.decoder = decoder 
 
-    self.encoder = lambda x: self.encoder_3(self.encoder_2(self.encoder_1(x)))
-   
+
     self.fm_x = layers.QFeatureMapRFF(
-            input_dim=input_enc,
+            input_dim=input_enc+2,
             dim=dim_x, gamma=gamma, random_state=random_state)
     self.fm_x.trainable = False
     self.qmd = layers.QMeasureDensityEig(dim_x=dim_x, num_eig=num_eig)
@@ -34,12 +47,6 @@ class Qaddemadac(keras.Model):
     self.dim_x = dim_x
     self.gamma = gamma
     self.random_state = random_state
-
-    self.decoder_1 = keras.layers.Dense(16, activation="relu")
-    self.decoder_2 = keras.layers.Dense(32, activation="relu")
-    self.decoder_3 = keras.layers.Dense(input_size, activation="sigmoid")
-
-    self.decoder = lambda x: self.decoder_3(self.decoder_2(self.decoder_1(x)))
 
     self.total_loss_tracker = keras.metrics.Mean(name="total_loss")
     self.reconstruction_loss_tracker = keras.metrics.Mean(
@@ -58,40 +65,48 @@ class Qaddemadac(keras.Model):
   def call(self, data):
       X, y = data
 
-      encoded = self.encoder_1(X)
-      print("call:encoder_2")
-      encoded = self.encoder_2(encoded)
-      print("call: encoder_3")
-      encoded = self.encoder_3(encoded)
+      print("call: decoder")
+      encoded = self.encoder(X)
 
+      print("call: decoder")
+      reconstruction = self.decoder(encoded)
+
+      reconstruction_loss = (1-self.alpha) * keras.losses.binary_crossentropy(X, reconstruction)
+      
+      cosine_similarity = keras.losses.cosine_similarity(X, reconstruction)
+
+      encoded_kde = keras.layers.Concatenate(axis=1)([encoded, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])])  
+      
       print("call: fm_x")
-      rff = self.fm_x(encoded)
+      rff = self.fm_x(encoded_kde)
       print("call: qmd")
       probs = self.qmd(rff)
       
-      print("call: decoder_1")
-      reconstruction = self.decoder_1(encoded)
-      print("call: decoder_2")
-      reconstruction = self.decoder_2(reconstruction)
-      print("call: decoder_3")
-      reconstruction = self.decoder_3(reconstruction)
-
       return [probs, reconstruction]
+
+  def compute_errors(self, X, probs, reconstruction):
+    print("train_step: probs_loss")
+    probs_loss = -self.alpha * tf.reduce_sum(tf.math.log(probs))
+
+    print("train_step: reconstruction_loss")
+    #tf.print(X.shape)
+    #tf.print(reconstruction.shape)
+    reconstruction_loss = (1-self.alpha) * tf.reduce_mean(
+            keras.losses.binary_crossentropy(X, reconstruction)
+    )
+    print("train_step: total_loss")
+    total_loss = reconstruction_loss + probs_loss
+
+    return probs_loss, reconstruction_loss, total_loss
+
 
 
   def test_step(self, data):
     X, y = data
     # Compute predictions
     probs, reconstruction = self(data, training=False)
+    probs_loss, reconstruction_loss, total_loss = self.compute_errors(X, probs, reconstruction)
 
-    print("test_step: probs_loss")
-    probs_loss = -tf.reduce_sum(tf.math.log(probs))
-    print("test_step: reconstruction_loss")
-    reconstruction_loss = tf.reduce_mean(
-            keras.losses.binary_crossentropy(X, reconstruction)
-    )
-    print("test_step: total_loss")
-    total_loss = reconstruction_loss + probs_loss
     self.total_loss_tracker.update_state(total_loss)
     self.reconstruction_loss_tracker.update_state(reconstruction_loss)
     self.probs_loss_tracker.update_state(probs_loss)
@@ -105,16 +120,7 @@ class Qaddemadac(keras.Model):
 
         with tf.GradientTape() as tape:
             probs, reconstruction = self.call(data)
-
-            print("train_step: probs_loss")
-            probs_loss = -tf.reduce_sum(tf.math.log(probs))
-
-            print("train_step: reconstruction_loss")
-            reconstruction_loss = tf.reduce_mean(
-                    keras.losses.binary_crossentropy(X, reconstruction)
-            )
-            print("train_step: total_loss")
-            total_loss = reconstruction_loss + probs_loss
+            probs_loss, reconstruction_loss, total_loss = self.compute_errors(X, probs, reconstruction)
 
         print("train_step: grads")
         grads = tape.gradient(total_loss, self.trainable_weights)

@@ -104,7 +104,7 @@ def build_model(setting, x_train_rff, x_test_rff):
     sigma = setting["z_sigma"]
     gamma= 1/ (2*sigma**2)
 
-    dimension=setting["z_adaptive_input_dimension"]
+    dimension=setting["z_adaptive_input_dimension"]+2
 
     print(f'Gamma: {gamma}')
     y_train_rff = gauss_kernel_arr(x_train_rff[:, 0, ...], x_train_rff[:, 1, ...], gamma=gamma)

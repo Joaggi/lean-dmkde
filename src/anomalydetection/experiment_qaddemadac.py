@@ -6,6 +6,7 @@ import tensorflow as tf
 from calculate_metrics import calculate_metrics
 from find_best_threshold import find_best_threshold
 from calculate_eigs import calculate_eigs
+from encoder_decoder_creator import encoder_decoder_creator
 
 import tensorflow as tf
 
@@ -23,9 +24,12 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
         
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
+            #mlflow.tensorflow.autolog(log_models=False)
             sigma = setting["z_sigma"]
             setting["z_gamma"] = 1/ (2*sigma**2)
 
+            setting["z_adaptive_input_dimension"] = setting["z_sequential"][-1]
+            setting["z_sequential"] = setting["z_sequential"][:-1]
             
             polinomial_decay = tf.keras.optimizers.schedules.PolynomialDecay(setting["z_base_lr"], \
                 setting["z_decay_steps"], setting["z_end_lr"], power=setting["z_power"])
@@ -39,23 +43,45 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
             X = np.array(X)
 
             rho, num_eig = calculate_eigs(X, setting, i)
+            
+            encoder, decoder = encoder_decoder_creator(input_size=X.shape[1], input_enc=setting["z_adaptive_input_dimension"], \
+                        sequential=setting["z_sequential"], layer=setting["z_layer"], regularizer=setting["z_regularizer"])
 
-
-            qaddemadac_alg = qaddemadac.Qaddemadac(X.shape[1], setting["z_adaptive_input_dimension"], setting["z_rff_components"], num_eig=num_eig, gamma=setting["z_gamma"])
+            qaddemadac_alg = qaddemadac.Qaddemadac(X.shape[1], setting["z_adaptive_input_dimension"], \
+                        setting["z_rff_components"], num_eig=num_eig, gamma=setting["z_gamma"], alpha=setting["z_alpha"], \
+                        layer=setting["z_layer"], encoder=encoder, decoder=decoder)
 
             qaddemadac_alg.compile(optimizer)
             #eig_vals = qaddemadac_alg.set_rho(rho)
 
             if setting["z_adaptive_fourier_features_enable"] == True:
-                autoencoder = anomaly_detector.AnomalyDetector(X.shape[1], setting["z_adaptive_input_dimension"])
-                autoencoder.compile(optimizer=optimizer, loss='mae')
+                autoencoder = anomaly_detector.AnomalyDetector(X.shape[1], setting["z_adaptive_input_dimension"], \
+                         layer = setting["z_layer"], \
+                         regularizer = setting["z_regularizer"], encoder=encoder, decoder=decoder)
+
+                autoencoder.compile(optimizer=optimizer, loss='mse')
+
                 history = autoencoder.fit(X, X, 
                           epochs=setting["z_autoencoder_epochs"], 
                           batch_size=setting["z_autoencoder_batch_size"],
                           shuffle=True)
                 
-                encoded_data = autoencoder.encoder(X).numpy()
-                rff_layer = adaptive_rff.fit_transform(setting, encoded_data)
+                encoded_data = autoencoder.encoder(X)
+
+                reconstruction = autoencoder.decoder(encoded_data)
+                reconstruction = tf.cast(reconstruction, tf.float64)
+
+                reconstruction_loss = (1-setting["z_alpha"]) * tf.keras.losses.binary_crossentropy(X, reconstruction)
+                
+                cosine_similarity = tf.keras.losses.cosine_similarity(X, reconstruction)
+
+                encoded_kde = tf.keras.layers.Concatenate(axis=1)([encoded_data, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])]).numpy()
+
+
+                rff_layer = adaptive_rff.fit_transform(setting, encoded_kde)
+                qaddemadac_alg.encoder = autoencoder.encoder
+                qaddemadac_alg.decoder = autoencoder.decoder
+
                 qaddemadac_alg.fm_x = rff_layer
 
 
@@ -67,7 +93,7 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
 
             
 
-            y_test_pred, reconstruction_error = qaddemadac_alg.predict((X_test, X_test))
+            y_test_pred, _ = qaddemadac_alg.predict((X_test, X_test))
 
             if np.isclose(setting["z_threshold"], 0.0, rtol=0.0):
                 thresh = find_best_threshold(y_test, y_test_pred)
@@ -76,8 +102,12 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
             preds = (y_test_pred < setting["z_threshold"]).astype(int)
             metrics = calculate_metrics(y_test, preds, y_test_pred, setting["z_run_name"])
 
+            print("Loggin metrics")
             mlflow.log_params(setting)
             mlflow.log_metrics(metrics)
+            #[mlflow.log_metric("loss", metric, i) for metric, i in enumerate(history.history["loss"])]
+            #[mlflow.log_metric("reconstruction_loss", metric, i) for metric, i in enumerate(history.history["reconstruction_loss"])]
+            #[mlflow.log_metric("probs_loss", metric, i) for metric, i in enumerate(history.history["probs_loss"])]
 
             if best:
                 np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'), preds, delimiter=',')
