@@ -49,7 +49,8 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
 
             qaddemadac_alg = qaddemadac.Qaddemadac(X.shape[1], setting["z_adaptive_input_dimension"], \
                         setting["z_rff_components"], num_eig=num_eig, gamma=setting["z_gamma"], alpha=setting["z_alpha"], \
-                        layer=setting["z_layer"], encoder=encoder, decoder=decoder)
+                        layer=setting["z_layer"], encoder=encoder, decoder=decoder, \
+                        enable_reconstruction_metrics=setting["z_adaptive_fourier_features_enable"])
 
             qaddemadac_alg.compile(optimizer)
             #eig_vals = qaddemadac_alg.set_rho(rho)
@@ -68,15 +69,18 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
                 
                 encoded_data = autoencoder.encoder(X)
 
-                reconstruction = autoencoder.decoder(encoded_data)
-                reconstruction = tf.cast(reconstruction, tf.float64)
+                if setting["z_enable_reconstruction_metrics"]: 
+                    reconstruction = autoencoder.decoder(encoded_data)
+                    reconstruction = tf.cast(reconstruction, tf.float64)
 
-                reconstruction_loss = (1-setting["z_alpha"]) * tf.keras.losses.binary_crossentropy(X, reconstruction)
-                
-                cosine_similarity = tf.keras.losses.cosine_similarity(X, reconstruction)
+                    
+                    reconstruction_loss = (1-setting["z_alpha"]) * tf.keras.losses.binary_crossentropy(X, reconstruction)
+                    
+                    cosine_similarity = tf.keras.losses.cosine_similarity(X, reconstruction)
 
-                encoded_kde = tf.keras.layers.Concatenate(axis=1)([encoded_data, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])]).numpy()
-
+                    encoded_kde = tf.keras.layers.Concatenate(axis=1)([encoded_data, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])]).numpy()
+                else:
+                    encoded_kde = encoded_data
 
                 rff_layer = adaptive_rff.fit_transform(setting, encoded_kde)
                 qaddemadac_alg.encoder = autoencoder.encoder

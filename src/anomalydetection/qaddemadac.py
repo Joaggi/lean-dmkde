@@ -16,11 +16,13 @@ class Qaddemadac(keras.Model):
         gamma: float. Gamma parameter of the RBF kernel to be approximated.
         random_state: random number generator seed.
   """
-  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None, layer=tf.keras.layers.LeakyReLU(), random_state=None):
+  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None, layer=tf.keras.layers.LeakyReLU(), \
+        enable_reconstruction_metrics = True, random_state=None):
     super(Qaddemadac, self).__init__()
     self.alpha = alpha
     #regularizer = None
     regularizer = tf.keras.regularizers.l1(10e-5)
+    self.enable_reconstruction_metrics = enable_reconstruction_metrics 
 
     if encoder == None:
         self.encoder = tf.keras.Sequential([
@@ -37,9 +39,10 @@ class Qaddemadac(keras.Model):
     else:
         self.decoder = decoder 
 
+    aff_dimension = input_enc + (2 if self.enable_reconstruction_metrics else 0)
 
     self.fm_x = layers.QFeatureMapRFF(
-            input_dim=input_enc+2,
+            input_dim=aff_dimension,
             dim=dim_x, gamma=gamma, random_state=random_state)
     self.fm_x.trainable = False
     self.qmd = layers.QMeasureDensityEig(dim_x=dim_x, num_eig=num_eig)
@@ -70,12 +73,15 @@ class Qaddemadac(keras.Model):
 
       print("call: decoder")
       reconstruction = self.decoder(encoded)
-
-      reconstruction_loss = (1-self.alpha) * keras.losses.binary_crossentropy(X, reconstruction)
       
-      cosine_similarity = keras.losses.cosine_similarity(X, reconstruction)
+      if self.enable_reconstruction_metrics:
+          reconstruction_loss = (1-self.alpha) * keras.losses.binary_crossentropy(X, reconstruction)
+          
+          cosine_similarity = keras.losses.cosine_similarity(X, reconstruction)
 
-      encoded_kde = keras.layers.Concatenate(axis=1)([encoded, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])])  
+          encoded_kde = keras.layers.Concatenate(axis=1)([encoded, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])])  
+      else:
+          encoded_kde = encoded
       
       print("call: fm_x")
       rff = self.fm_x(encoded_kde)

@@ -48,7 +48,8 @@ setting = {
     "z_random_search_random_state": 42,
     "z_random_search_iter": 100,
     "z_layer": tf.keras.layers.LeakyReLU(), 
-    "z_regularizer": tf.keras.regularizers.l1(10e-5)
+    "z_regularizer": tf.keras.regularizers.l1(10e-5),
+    "z_enable_reconstruction_metrics": False
 }
 
 #prod_settings = { 
