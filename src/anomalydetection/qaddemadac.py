@@ -74,8 +74,8 @@ class Qaddemadac(keras.Model):
       print("call: decoder")
       reconstruction = self.decoder(encoded)
       
-      if self.enable_reconstruction_metrics:
-          reconstruction_loss = (1-self.alpha) * keras.losses.binary_crossentropy(X, reconstruction)
+      if self.enable_reconstruction_metrics == True:
+          reconstruction_loss = keras.losses.binary_crossentropy(X, reconstruction)
           
           cosine_similarity = keras.losses.cosine_similarity(X, reconstruction)
 
