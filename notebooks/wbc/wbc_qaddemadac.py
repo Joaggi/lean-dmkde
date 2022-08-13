@@ -23,9 +23,9 @@ from mlflow_create_experiment import mlflow_create_experiment
 
 
 setting = {
-    "z_name_of_experiment": 'qaddemadac_v2_letter',
+    "z_name_of_experiment": 'qaddemadac_v2_wbc',
     "z_run_name": "qaddemadac",
-    "z_dataset": "letter",
+    "z_dataset": "wbc",
     "z_batch_size": 256,
     "z_select_best_experiment": True,
     "z_threshold": 0.0,

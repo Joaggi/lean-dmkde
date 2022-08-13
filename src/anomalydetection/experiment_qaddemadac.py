@@ -67,7 +67,7 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
                 history = autoencoder.fit(X, X, 
                           epochs=setting["z_autoencoder_epochs"], 
                           batch_size=setting["z_autoencoder_batch_size"],
-                          shuffle=True)
+                          shuffle=True, verbose=0)
                 
                 encoded_data = autoencoder.encoder(X)
 
@@ -95,11 +95,11 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
                       epochs=setting["z_epochs"], 
                       batch_size=setting["z_batch_size"],
                       #validation_data=(test_data, test_data),
-                      shuffle=True)
+                      shuffle=True, verbose=0)
 
-            
 
-            y_test_pred, _ = qaddemadac_alg.predict((X_test, X_test))
+
+            y_test_pred, _ = qaddemadac_alg.predict((X_test, X_test), verbose=0)
 
             if np.isclose(setting["z_threshold"], 0.0, rtol=0.0):
                 thresh = find_best_threshold(y_test, y_test_pred)
@@ -123,3 +123,4 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
 
             print(f"experiment_dmkde_sgd {i} metrics {metrics}")
             print(f"experiment_dmkde_sgd {i} threshold {setting['z_threshold']}")
+

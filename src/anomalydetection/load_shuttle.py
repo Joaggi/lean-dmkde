@@ -13,8 +13,7 @@ def load_shuttle(path, algorithm):
 
     pos_label = 0
 
-    y = convert_dataset(labels, pos_label, algorithm)
-
+    y = convert_dataset(sub_labels, pos_label, algorithm)
 
     X_train, X_test, y_train, y_test = train_test_split(sub_train, y, test_size=0.3, random_state=42, stratify=y)
 
