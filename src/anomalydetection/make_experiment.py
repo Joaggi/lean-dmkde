@@ -6,7 +6,7 @@ from experiment_oneclass import experiment_oneclass
 from experiment_isolation import experiment_isolation
 from experiment_covariance import experiment_covariance
 from experiment_lake import experiment_lake
-from experiment_qaddemadac import experiment_qaddemadac
+from experiment_leand import experiment_leand
 from experiment_kde import experiment_kde
 from experiment_autoencoder import experiment_ae
 
@@ -34,8 +34,8 @@ def make_experiment(algorithm, X_train, y_train, X_test, y_test, settings, mlflo
         experiment_lake(X_train, y_train, X_test, y_test, settings, mlflow, best)
     if algorithm.startswith("pyod"):
         experiment_pyod(X_train, y_train, X_test, y_test, settings, mlflow, best)
-    if algorithm == "qaddemadac":
-        experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, best)
+    if algorithm == "leand":
+        experiment_leand(X_train, y_train, X_test, y_test, settings, mlflow, best)
     if algorithm == "kde":
         experiment_kde(X_train, y_train, X_test, y_test, settings, mlflow, best)
     if algorithm == "autoencoder":

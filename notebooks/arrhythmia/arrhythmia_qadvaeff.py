@@ -6,7 +6,7 @@ try:
 except:
     from notebooks.initialization import initialization
 
-parent_path = initialization("qaddemadac", "/Doctorado/")
+parent_path = initialization("leand", "/Doctorado/")
 
 
 import qmc.tf.layers as layers

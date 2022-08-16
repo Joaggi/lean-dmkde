@@ -6,8 +6,8 @@ try:
 except:
     from notebooks.initialization import initialization
 
-parent_path = initialization("qaddemadac", "/home/oabustosb/Desktop/")
-
+#parent_path = initialization("leand", "/home/oabustosb/Desktop/")
+parent_path = initialization("leand", "/Doctorado/")
 
 import qmc.tf.layers as layers
 import qmc.tf.models as models
@@ -23,9 +23,9 @@ from mlflow_create_experiment import mlflow_create_experiment
 
 
 setting = {
-    "z_name_of_experiment": 'qaddemadac_v2_vowels',
-    "z_run_name": "qaddemadac",
-    "z_dataset": "vowels",
+    "z_name_of_experiment": 'leand_v2_musk',
+    "z_run_name": "leand",
+    "z_dataset": "musk",
     "z_batch_size": 256,
     "z_select_best_experiment": True,
     "z_threshold": 0.0,
@@ -38,10 +38,10 @@ setting = {
     "z_autoencoder_batch_size": int(256),
     "z_adaptive_base_lr": 1e-2,
     "z_adaptive_end_lr": 1e-5,
-    "z_adaptive_decay_steps": 100,
+    "z_adaptive_decay_steps": 10,
     "z_adaptive_power": 1,
     "z_adaptive_batch_size": 256,
-    "z_adaptive_epochs": 100,
+    "z_adaptive_epochs": 10,
     "z_random_search": True,
     "z_random_search_random_state": 42,
     "z_random_search_iter": 200,
@@ -58,19 +58,30 @@ prod_settings = {
     "z_alpha": [0, 0.01, 0.1, 0.5, 0.9, 0.99, 1], 
     "z_enable_reconstruction_metrics": [False, True]
 }
-#prod_settings = {"z_gamma" : [2**-6]}
 
-#prod_settings = { 
-#    "z_adaptive_fourier_features_enable": [False],
-#    "z_sigma": [1],  
-#    "z_max_num_eigs": [20,50,100,500],
-#    "z_alpha": [0.1],
-#    "z_sequential": [(64,32,16),(128,64,32,8),(128,32,2),(64,20,10,4)],
-#    "z_enable_reconstruction_metrics": [False, True]
-#}
+prod_settings_rff = { 
+    "z_adaptive_fourier_features_enable": [ False],
+    "z_sigma": [4.0],
+    "z_rff_components": [1000],
+    "z_max_num_eigs": [0.2],
+    "z_sequential": [(64,32,16)],
+    "z_alpha": [0.99], 
+    "z_enable_reconstruction_metrics": [ True]
+}
+
+prod_settings_aff = { 
+    "z_adaptive_fourier_features_enable": [ True],
+    "z_sigma": [2.0, 2.0],
+    "z_rff_components": [2000],
+    "z_max_num_eigs": [1.0],
+    "z_sequential": [(64,20,10,4)],
+    "z_alpha": [0.5], 
+    "z_enable_reconstruction_metrics": [ True]
+}
+ 
+prod_settings = prod_settings_aff
 
 
-
-mlflow = mlflow_create_experiment(setting["z_name_of_experiment"], server="local")
+mlflow = mlflow_create_experiment(setting["z_name_of_experiment"], server="server")
 
 experiments(setting, prod_settings, mlflow)

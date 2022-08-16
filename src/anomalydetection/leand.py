@@ -4,7 +4,7 @@ import qmc.tf.models as models
 import tensorflow as tf
 
 
-class Qaddemadac(keras.Model):
+class Leand(keras.Model):
   """
     A Quantum Anomaly Detection Density Matrix Adaptive Autoencoer.
     Arguments:
@@ -18,7 +18,7 @@ class Qaddemadac(keras.Model):
   """
   def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None, layer=tf.keras.layers.LeakyReLU(), \
         enable_reconstruction_metrics = True, random_state=None):
-    super(Qaddemadac, self).__init__()
+    super(Leand, self).__init__()
     self.alpha = alpha
     #regularizer = None
     regularizer = tf.keras.regularizers.l1(10e-5)

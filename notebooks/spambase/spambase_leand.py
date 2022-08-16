@@ -6,7 +6,7 @@ try:
 except:
     from notebooks.initialization import initialization
 
-parent_path = initialization("qaddemadac", "/home/oabustosb/Desktop/")
+parent_path = initialization("leand", "/home/oabustosb/Desktop/")
 
 
 import qmc.tf.layers as layers
@@ -23,9 +23,9 @@ from mlflow_create_experiment import mlflow_create_experiment
 
 
 setting = {
-    "z_name_of_experiment": 'qaddemadac_v2_letter',
-    "z_run_name": "qaddemadac",
-    "z_dataset": "letter",
+    "z_name_of_experiment": 'leand_v2_spambase',
+    "z_run_name": "leand",
+    "z_dataset": "spambase",
     "z_batch_size": 256,
     "z_select_best_experiment": True,
     "z_threshold": 0.0,
@@ -49,7 +49,7 @@ setting = {
     "z_regularizer": tf.keras.regularizers.l1(10e-5),
 }
 
-prod_settings = { 
+prod_settings_all = { 
     "z_adaptive_fourier_features_enable": [True, False],
     "z_sigma": [2**i for i in range(-5,10)],
     "z_rff_components": [250,500,1000,2000],
@@ -58,19 +58,28 @@ prod_settings = {
     "z_alpha": [0, 0.01, 0.1, 0.5, 0.9, 0.99, 1], 
     "z_enable_reconstruction_metrics": [False, True]
 }
-#prod_settings = {"z_gamma" : [2**-6]}
 
-#prod_settings = { 
-#    "z_adaptive_fourier_features_enable": [False],
-#    "z_sigma": [1],  
-#    "z_max_num_eigs": [20,50,100,500],
-#    "z_alpha": [0.1],
-#    "z_sequential": [(64,32,16),(128,64,32,8),(128,32,2),(64,20,10,4)],
-#    "z_enable_reconstruction_metrics": [False, True]
-#}
+prod_settings_rff = { 
+    "z_adaptive_fourier_features_enable": [False],
+    "z_sigma": [64.0],
+    "z_rff_components": [250],
+    "z_max_num_eigs": [1.0],
+    "z_sequential": [(128,64,32,8)],
+    "z_alpha": [0.1], 
+    "z_enable_reconstruction_metrics": [True]
+}
+
+prod_settings_aff = { 
+    "z_adaptive_fourier_features_enable": [True],
+    "z_sigma": [16.0],
+    "z_rff_components": [500],
+    "z_max_num_eigs": [0.05],
+    "z_sequential": [(128,32,2)],
+    "z_alpha": [0.5], 
+    "z_enable_reconstruction_metrics": [True]
+}
 
 
-
-mlflow = mlflow_create_experiment(setting["z_name_of_experiment"], server="local")
+mlflow = mlflow_create_experiment(setting["z_name_of_experiment"], server="server")
 
 experiments(setting, prod_settings, mlflow)

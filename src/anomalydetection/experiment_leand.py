@@ -10,7 +10,7 @@ from encoder_decoder_creator import encoder_decoder_creator
 
 import tensorflow as tf
 
-import qaddemadac
+import leand
 import anomaly_detector
 import adaptive_rff
 
@@ -18,7 +18,7 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 
-def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
+def experiment_leand(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
 
     for i, setting in enumerate(settings):
         
@@ -49,13 +49,13 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
 
             aff_dimension = setting["z_adaptive_input_dimension"] + (2 if setting["z_enable_reconstruction_metrics"] else 0)
 
-            qaddemadac_alg = qaddemadac.Qaddemadac(X.shape[1], setting["z_adaptive_input_dimension"], \
+            leand_alg = leand.Leand(X.shape[1], setting["z_adaptive_input_dimension"], \
                         setting["z_rff_components"], num_eig=num_eig, gamma=setting["z_gamma"], alpha=setting["z_alpha"], \
                         layer=setting["z_layer"], encoder=encoder, decoder=decoder, \
                         enable_reconstruction_metrics=setting["z_enable_reconstruction_metrics"])
 
-            qaddemadac_alg.compile(optimizer)
-            #eig_vals = qaddemadac_alg.set_rho(rho)
+            leand_alg.compile(optimizer)
+            #eig_vals = leand_alg.set_rho(rho)
 
             if setting["z_adaptive_fourier_features_enable"] == True:
                 autoencoder = anomaly_detector.AnomalyDetector(X.shape[1], setting["z_adaptive_input_dimension"], \
@@ -85,13 +85,13 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
                     encoded_kde = encoded_data.numpy()
 
                 rff_layer = adaptive_rff.fit_transform(setting, encoded_kde)
-                qaddemadac_alg.encoder = autoencoder.encoder
-                qaddemadac_alg.decoder = autoencoder.decoder
+                leand_alg.encoder = autoencoder.encoder
+                leand_alg.decoder = autoencoder.decoder
 
-                qaddemadac_alg.fm_x = rff_layer
+                leand_alg.fm_x = rff_layer
 
 
-            history = qaddemadac_alg.fit(X, X, 
+            history = leand_alg.fit(X, X, 
                       epochs=setting["z_epochs"], 
                       batch_size=setting["z_batch_size"],
                       #validation_data=(test_data, test_data),
@@ -99,7 +99,7 @@ def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, be
 
 
 
-            y_test_pred, _ = qaddemadac_alg.predict((X_test, X_test), verbose=0)
+            y_test_pred, _ = leand_alg.predict((X_test, X_test), verbose=0)
 
             if np.isclose(setting["z_threshold"], 0.0, rtol=0.0):
                 thresh = find_best_threshold(y_test, y_test_pred)

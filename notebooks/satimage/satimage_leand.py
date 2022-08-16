@@ -6,7 +6,7 @@ try:
 except:
     from notebooks.initialization import initialization
 
-parent_path = initialization("qaddemadac", "/home/oabustosb/Desktop/")
+parent_path = initialization("leand", "/home/oabustosb/Desktop/")
 
 
 import qmc.tf.layers as layers
@@ -23,8 +23,8 @@ from mlflow_create_experiment import mlflow_create_experiment
 
 
 setting = {
-    "z_name_of_experiment": 'qaddemadac_v2_satimage',
-    "z_run_name": "qaddemadac",
+    "z_name_of_experiment": 'leand_v2_satimage',
+    "z_run_name": "leand",
     "z_dataset": "satimage",
     "z_batch_size": 256,
     "z_select_best_experiment": True,

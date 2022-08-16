@@ -67,7 +67,7 @@ class DMRFF(tf.keras.Model):
         x2 = inputs[:, 1, :]
         phi1 = self.rff_layer(x1)
         phi2 = self.rff_layer(x2)
-        dot = tf.einsum('...i,...i->...', phi1, phi2) 
+        dot = tf.einsum('...i,...i->...', phi1, phi2, optimize='optimal') 
         return dot
 
 def calc_rbf(dmrff, x1, x2):
@@ -81,7 +81,7 @@ def gauss_kernel_arr(x, y, gamma):
 
 def build_features(X):
     X_train, X_test = train_test_split(X)
-    num_samples = 100000
+    num_samples = 1000000
     rnd_idx1 = np.random.randint(X_train.shape[0],size=(num_samples, ))
     rnd_idx2 = np.random.randint(X_train.shape[0],size=(num_samples, ))
     x_train_rff = np.concatenate([X_train[rnd_idx1][:, np.newaxis, ...], 

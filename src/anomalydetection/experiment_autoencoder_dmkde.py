@@ -10,7 +10,7 @@ from encoder_decoder_creator import encoder_decoder_creator
 
 import tensorflow as tf
 
-import qaddemadac
+import leand
 import anomaly_detector
 import adaptive_rff
 
@@ -18,7 +18,7 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 
-def experiment_qaddemadac(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
+def experiment_leand(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
 
     for i, setting in enumerate(settings):
         
