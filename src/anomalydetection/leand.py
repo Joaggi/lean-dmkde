@@ -16,7 +16,8 @@ class Leand(keras.Model):
         gamma: float. Gamma parameter of the RBF kernel to be approximated.
         random_state: random number generator seed.
   """
-  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None, layer=tf.keras.layers.LeakyReLU(), \
+  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None, 
+          layer=tf.keras.layers.LeakyReLU(), \
         enable_reconstruction_metrics = True, random_state=None):
     super(Leand, self).__init__()
     self.alpha = alpha

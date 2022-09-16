@@ -23,9 +23,9 @@ from mlflow_create_experiment import mlflow_create_experiment
 
 
 setting = {
-    "z_name_of_experiment": 'qadvaeff_arrhythmia',
+    "z_name_of_experiment": 'qadvaeff_glass',
     "z_run_name": "qadvaeff",
-    "z_dataset": "arrhythmia",
+    "z_dataset": "glass",
     "z_rff_components": 1000,
     "z_batch_size": 128,
     "z_select_best_experiment": True,
@@ -38,8 +38,8 @@ setting = {
     "z_decay_steps": int(1000),
     "z_autoencoder_epochs": int(200),
     "z_autoencoder_batch_size": int(256),
-    "z_adaptive_base_lr": 1e-1,
-    "z_adaptive_end_lr": 1e-5,
+    "z_adaptive_base_lr": 1e-3,
+    "z_adaptive_end_lr": 1e-6,
     "z_adaptive_decay_steps": 30,
     "z_adaptive_power": 1,
     "z_adaptive_batch_size": 512,
@@ -48,17 +48,19 @@ setting = {
     "z_random_search_random_state": 42,
     "z_random_search_iter": 200,
     "z_layer": tf.keras.layers.LeakyReLU(), 
+    #"z_layer": tf.keras.activations.tanh, 
     "z_regularizer": tf.keras.regularizers.l1(10e-5),
 }
 
 prod_settings = { 
-    "z_adaptive_fourier_features_enable": [True],
-    "z_sigma": [0.01, 0.2, 0.5, 1, 2, 8, 15],
+    "z_adaptive_fourier_features_enable": [False, True],
+    "z_sigma": [0.001, 0.01, 0.2, 0.5, 1, 2, 8, 15, 100, 1000],
     "z_rff_components": [4000],
     "z_max_num_eigs": [0.1, 0.2, 0.5, 1.0],
-    "z_sequential": [(64,32,16),(128,64,32,8),(128,32,2),(64,20,10,4)],
-    "z_alpha": [0.1, 0.5, 0.9], 
-    "z_enable_reconstruction_metrics": [True]
+    "z_sequential": [(22,20,15),(64,32,16),(128,64,32,8),(128,32,2),(64,20,10,4)],
+    #"z_sequential": [(22,20,15)],
+    "z_alpha": [0.1, 0.5, 0.9, 0.99, 1], 
+    "z_enable_reconstruction_metrics": [False, True]
 }
 
 

@@ -18,27 +18,19 @@ class Sampling(keras.layers.Layer):
     epsilon = tf.keras.backend.random_normal(shape=(batch, dim))
     return z_mean + tf.exp(0.5 * z_log_var) * epsilon
 
-class Qadvaeff(keras.Model):
+class VariationalAutoencoder(keras.Model):
   """
-    A Quantum Anomaly Detection algorithm using density matrices, Fourier features and variational autoencoders.
+    A Variatonal Autoencoder Anomaly Detection algorithm using variational autoencoders.
     Arguments:
         input_enc: dimension of the encoder
-        dim_x: dimension of the input quantum feature map
-        dim_y: dimension of the output representation
-        num_eig: Number of eigenvectors used to represent the density matrix. 
-                 a value of 0 or less implies num_eig = dim_x * dim_y
-        gamma: float. Gamma parameter of the RBF kernel to be approximated.
         random_state: random number generator seed.
   """
-  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None, 
-          layer=tf.keras.layers.LeakyReLU(), \
-        enable_reconstruction_metrics = True, random_state=None):
-    super(Qadvaeff, self).__init__()
+  def __init__(self, input_size, input_enc, encoder = None, decoder = None, 
+          layer=tf.keras.layers.LeakyReLU()):
+    super(VariationalAutoencoder, self).__init__()
 
-    self.alpha = alpha
     #regularizer = None
     regularizer = tf.keras.regularizers.l1(10e-5)
-    self.enable_reconstruction_metrics = enable_reconstruction_metrics 
 
     if encoder == None:
         self.encoder = tf.keras.Sequential([
@@ -55,13 +47,6 @@ class Qadvaeff(keras.Model):
     else:
         self.decoder = decoder 
 
-
-    aff_dimension = input_enc + (2 if self.enable_reconstruction_metrics else 0) 
-
-    self.fm_x = layers.QFeatureMapRFF(
-            input_dim=aff_dimension,
-            dim=dim_x, gamma=gamma, random_state=random_state)
-
     self.flatten = keras.layers.Flatten()
     self.dense = keras.layers.Dense(input_enc + input_enc)
 
@@ -69,20 +54,11 @@ class Qadvaeff(keras.Model):
 
     self.sampling = Sampling()
 
-    self.fm_x.trainable = False
-    self.qmd = layers.QMeasureDensityEig(dim_x=dim_x, num_eig=num_eig)
-    self.num_eig = num_eig
-    self.dim_x = dim_x
-    self.gamma = gamma
-    self.random_state = random_state
-
-
     self.total_loss_tracker = keras.metrics.Mean(name="total_loss")
 
     self.variational_error_tracker = keras.metrics.Mean(
         name="variational_error"
     )
-    self.probs_loss_tracker = keras.metrics.Mean(name="probs_loss")
 
    
   @property
@@ -90,7 +66,6 @@ class Qadvaeff(keras.Model):
       return [
           self.total_loss_tracker,
           self.variational_error_tracker,
-          self.probs_loss_tracker
       ]
 
 
@@ -116,10 +91,7 @@ class Qadvaeff(keras.Model):
       return probs
     return logits
 
-  def compute_errors(self, X, probs, reconstruction, mean, log_var, z):    
-    print("train_step: probs_loss")
-    probs_loss = -tf.reduce_sum(tf.math.log(probs))
-
+  def compute_errors(self, X, reconstruction, mean, log_var, z):    
     print("train_step: variational_error")
     cross_ent = tf.nn.sigmoid_cross_entropy_with_logits(logits=reconstruction, labels=X)
 
@@ -134,14 +106,13 @@ class Qadvaeff(keras.Model):
     variational_loss = -tf.reduce_mean(logpx_z + logpz - logqz_x)
 
     print("train_step: total_loss")
-    total_loss = (1-self.alpha) * variational_loss + self.alpha * probs_loss
+    total_loss = variational_loss 
 
-    return probs_loss, variational_loss, total_loss 
+    return variational_loss, total_loss 
 
-  def add_losses(self, probs_loss, variational_error, total_loss):
+  def add_losses(self, variational_error, total_loss):
     self.total_loss_tracker.update_state(total_loss)
     self.variational_error_tracker.update_state(variational_error)
-    self.probs_loss_tracker.update_state(probs_loss)
 
   def call(self, data):
       X, y = data
@@ -157,24 +128,7 @@ class Qadvaeff(keras.Model):
       print("call: decode")
       reconstruction = self.decode(z)
 
-      print(f"call: enable_reconstruction_metrics {self.enable_reconstruction_metrics}")
-      if self.enable_reconstruction_metrics == True:
-          reconstruction_loss = keras.losses.binary_crossentropy(X, reconstruction)
-          
-          cosine_similarity = keras.losses.cosine_similarity(X, reconstruction)
-
-          encoded_kde = keras.layers.Concatenate(axis=1)([encoder, 
-              tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])])  
-      else:
-          encoded_kde = encoder
-
-      print(f"call: fm_x z {encoded_kde}")
-      rff = self.fm_x(encoded_kde)
-
-      print("call: qmd")
-      probs = self.qmd(rff)
-     
-      return probs, reconstruction, mean, log_var, z
+      return reconstruction, mean, log_var, z
       
   def test_step(self, data):
     X, y = data
@@ -183,9 +137,9 @@ class Qadvaeff(keras.Model):
     probs, reconstruction, mean, log_var, z = self(data, training=False)
 
     print(f"test_step: compute_errors probs {probs} reconstruction {reconstruction} mean {mean} log_var {log_var}")
-    probs_loss, variational_error, total_loss = self.compute_errors(X, probs, reconstruction, mean, log_var, z)
+    variational_error, total_loss = self.compute_errors(X, reconstruction, mean, log_var, z)
 
-    self.add_losses(probs_loss, variational_error, total_loss)
+    self.add_losses(variational_error, total_loss)
 
     return {m.name: m.result() for m in self.metrics}
 
@@ -196,8 +150,8 @@ class Qadvaeff(keras.Model):
         X, y = data
 
         with tf.GradientTape() as tape:
-            probs, reconstruction, mean, log_var, z = self.call(data)
-            probs_loss, variational_error, total_loss = self.compute_errors(X, probs, reconstruction, mean, log_var, z)
+            reconstruction, mean, log_var, z = self.call(data)
+            variational_error, total_loss = self.compute_errors(X, reconstruction, mean, log_var, z)
 
 
         print("train_step: grads")
@@ -205,11 +159,10 @@ class Qadvaeff(keras.Model):
         print("train_step: apply_gradients")
         self.optimizer.apply_gradients(zip(grads, self.trainable_weights))
         print("train_step: loss_tracker")
-        self.add_losses(probs_loss, variational_error, total_loss)
+        self.add_losses(variational_error, total_loss)
 
         return {
             "loss": self.total_loss_tracker.result(),
-            "variational_error": self.variational_error_tracker.result(),
-            "probs_loss": self.probs_loss_tracker.result(),
+            "variational_error": self.variational_error_tracker.result()
         }
 
