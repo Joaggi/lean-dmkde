@@ -2,9 +2,9 @@ import qmc.tf.layers as layers
 import qmc.tf.models as models
 
 import numpy as np
+import ast
 import tensorflow as tf
 from calculate_metrics import calculate_metrics
-from find_best_threshold import find_best_threshold
 from calculate_eigs import calculate_eigs
 from encoder_decoder_creator import encoder_decoder_creator
 
@@ -18,18 +18,23 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 
-def experiment_leand(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
+def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
 
-    for i, setting in enumerate(settings):
+    #for i, setting in enumerate(settings):
         
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
             #mlflow.tensorflow.autolog(log_models=False)
             sigma = setting["z_sigma"]
             setting["z_gamma"] = 1/ (2*sigma**2)
-
-            setting["z_adaptive_input_dimension"] = setting["z_sequential"][-1]
-            setting["z_sequential"] = setting["z_sequential"][:-1]
+            
+            setting["z_sequential"] = ast.literal_eval(setting["z_sequential"])
+            if not best:
+                setting["z_adaptive_input_dimension"] = setting["z_sequential"][-1]
+                setting["z_sequential"] = setting["z_sequential"][:-1]
+            
+            setting["z_layer"] = tf.keras.layers.LeakyReLU()
+            setting["z_regularizer"] = tf.keras.regularizers.l1(10e-5)
             
             polinomial_decay = tf.keras.optimizers.schedules.PolynomialDecay(setting["z_base_lr"], \
                 setting["z_decay_steps"], setting["z_end_lr"], power=setting["z_power"])
@@ -74,16 +79,15 @@ def experiment_leand(X_train, y_train, X_test, y_test, settings, mlflow, best=Fa
                 if setting["z_enable_reconstruction_metrics"]: 
                     reconstruction = autoencoder.decoder(encoded_data)
                     reconstruction = tf.cast(reconstruction, tf.float64)
-
-                    
+                    print("Concatenating")
                     reconstruction_loss = tf.keras.losses.binary_crossentropy(X, reconstruction)
-                    
                     cosine_similarity = tf.keras.losses.cosine_similarity(X, reconstruction)
-
                     encoded_kde = tf.keras.layers.Concatenate(axis=1)([encoded_data, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])]).numpy()
                 else:
                     encoded_kde = encoded_data.numpy()
+                    print("Not concatenated")
 
+                print(encoded_kde.shape)
                 rff_layer = adaptive_rff.fit_transform(setting, encoded_kde)
                 leand_alg.encoder = autoencoder.encoder
                 leand_alg.decoder = autoencoder.decoder
@@ -100,27 +104,22 @@ def experiment_leand(X_train, y_train, X_test, y_test, settings, mlflow, best=Fa
 
 
             y_test_pred, _ = leand_alg.predict((X_test, X_test), verbose=0)
-
-            if np.isclose(setting["z_threshold"], 0.0, rtol=0.0):
-                thresh = find_best_threshold(y_test, y_test_pred)
-                setting["z_threshold"] = thresh
+            
+            g = np.sum(y_test) / len(y_test)
+            setting["z_threshold"] = np.percentile(y_test_pred, int(g*100))
 
             preds = (y_test_pred < setting["z_threshold"]).astype(int)
             metrics = calculate_metrics(y_test, preds, y_test_pred, setting["z_run_name"])
 
-            print("Loggin metrics")
             mlflow.log_params(setting)
             mlflow.log_metrics(metrics)
-            #[mlflow.log_metric("loss", metric, i) for metric, i in enumerate(history.history["loss"])]
-            #[mlflow.log_metric("reconstruction_loss", metric, i) for metric, i in enumerate(history.history["reconstruction_loss"])]
-            #[mlflow.log_metric("probs_loss", metric, i) for metric, i in enumerate(history.history["probs_loss"])]
 
             if best:
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'), preds, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'))
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'), y_test_pred, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'))
+                mlflow.log_params({"w_best": best})                
+                f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
+                np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=y_test_pred, scores=y_scores)
+                mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))
+                f.close()
 
-            print(f"experiment_dmkde_sgd {i} metrics {metrics}")
-            print(f"experiment_dmkde_sgd {i} threshold {setting['z_threshold']}")
-
+            print(f"experiment_leand {i} metrics {metrics}")
+            print(f"experiment_leand {i} threshold {setting['z_threshold']}")

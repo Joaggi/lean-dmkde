@@ -1,10 +1,10 @@
 import qmc.tf.layers as layers
 import qmc.tf.models as models
 
+import ast
 import numpy as np
 import tensorflow as tf
 from calculate_metrics import calculate_metrics
-from find_best_threshold import find_best_threshold
 from calculate_eigs import calculate_eigs
 from encoder_decoder_creator import encoder_decoder_creator
 
@@ -17,9 +17,9 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 
-def experiment_ae(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
+def experiment_ae(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
 
-    for i, setting in enumerate(settings):
+    #for i, setting in enumerate(settings):
 
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
@@ -35,6 +35,9 @@ def experiment_ae(X_train, y_train, X_test, y_test, settings, mlflow, best=False
 
             X = np.array(X)
 
+            setting["z_sequential"] = ast.literal_eval(setting["z_sequential"])
+            setting["z_layer"] = tf.keras.layers.Activation(setting["z_layername"])
+            setting["z_regularizer"] = tf.keras.regularizers.l1(10e-5)
 
             encoder, decoder = encoder_decoder_creator(input_size=X.shape[1], input_enc=setting["z_sequential"][-1], \
                         sequential=setting["z_sequential"][:-1], layer=setting["z_layer"], regularizer=setting["z_regularizer"])
@@ -57,7 +60,7 @@ def experiment_ae(X_train, y_train, X_test, y_test, settings, mlflow, best=False
             reconstruction_loss = [ (np.linalg.norm(reconstruction[i]-X[i]))**2 for i in range(X.shape[0]) ]
 
             nu = np.sum(y_test) / len(y_test)
-            setting["z_threshold"] = np.percentile(reconstruction_loss, 100*(1-nu))
+            if np.allclose(setting["z_threshold"], 0.0): setting["z_threshold"] = np.percentile(reconstruction_loss, 100*(1-nu))
 
             reconstruction_test = autoencoder.predict((X_test, X_test))
             reconstruction_error = [ (np.linalg.norm(reconstruction_test[i]-X_test[i]))**2 for i in range(X_test.shape[0]) ]
@@ -69,15 +72,13 @@ def experiment_ae(X_train, y_train, X_test, y_test, settings, mlflow, best=False
 
             mlflow.log_params(setting)
             mlflow.log_metrics(metrics)
-            [mlflow.log_metric("loss", metric, i) for metric, i in enumerate(history.history["loss"])]
-            # [mlflow.log_metric("reconstruction_loss", metric, i) for metric, i in enumerate(history.history["reconstruction_loss"])]
-            # [mlflow.log_metric("probs_loss", metric, i) for metric, i in enumerate(history.history["probs_loss"])]
-
+            
             if best:
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'), preds, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'))
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'), y_test_pred, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'))
-
+                mlflow.log_params({"w_best": best})
+                f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
+                np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=preds, scores=reconstruction_error)
+                mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))
+                f.close()
+            
             print(f"experiment_ae {i} metrics {metrics}")
             print(f"experiment_ae {i} threshold {setting['z_threshold']}")

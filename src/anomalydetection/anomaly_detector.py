@@ -27,4 +27,3 @@ class AnomalyDetector(keras.Model):
     encoded = self.encoder(x)
     decoded = self.decoder(encoded)
     return decoded
-

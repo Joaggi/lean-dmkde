@@ -1,6 +1,5 @@
-from typing import get_type_hints
 import numpy as np 
-
+import ast
 from sklearn.neighbors import KernelDensity
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
@@ -14,28 +13,24 @@ np.random.seed(42)
 torch.manual_seed(42)
 
 class Loader(object):
-    def __init__(self, features, labels, N_train, mode="train"):
+    def __init__(self, features, labels, N_train=0.3, mode="train"):
         self.mode = mode
         
-        outlier_data = features[labels==1]
-        outlier_labels = labels[labels==1]
+        test_data = features[1]
+        test_labels = labels[1]
 
-        attack_data = features[labels==0]
-        attack_labels = labels[labels==0]
+        train_data = features[0]
+        train_labels = labels[0]
 
-        N_attack = attack_data.shape[0]
-
-        randIdx = np.arange(N_attack)
-        np.random.shuffle(randIdx)
-        self.N_train = N_train
-        self.train = attack_data[randIdx[:self.N_train]]
-        self.train_labels = attack_labels[randIdx[:self.N_train]]
+        N_attack = train_data.shape[0]
         
-        self.test = attack_data[randIdx[self.N_train:]]
-        self.test_labels = attack_labels[randIdx[self.N_train:]]
+        self.N_train = N_attack
+        self.train = train_data
+        self.train_labels = train_labels
         
-        self.test = np.concatenate((self.test, outlier_data),axis=0)
-        self.test_labels = np.concatenate((self.test_labels, outlier_labels),axis=0)
+        self.test = test_data
+        self.test_labels = test_labels
+        
 
     def __len__(self):
         """
@@ -54,19 +49,19 @@ class Loader(object):
 
 
 class VAE(nn.Module):
-    def __init__(self, dim):
+    def __init__(self, dim, sz):
         super(VAE,self).__init__()
-        self.enc_1 = nn.Linear(dim,20)
-        self.enc = nn.Linear(20,15)
+        self.enc_1 = nn.Linear(dim,sz[0])
+        self.enc = nn.Linear(sz[0],sz[1])
         
         self.act = nn.Tanh()
         self.act_s = nn.Sigmoid()
-        self.mu = nn.Linear(15,15)
-        self.log_var = nn.Linear(15,15)
+        self.mu = nn.Linear(sz[1],sz[2])
+        self.log_var = nn.Linear(sz[1],sz[2])
         
-        self.z = nn.Linear(15,15)
-        self.z_1 = nn.Linear(15,20)
-        self.dec = nn.Linear(20,dim)
+        self.z = nn.Linear(sz[2],sz[1])
+        self.z_1 = nn.Linear(sz[1],sz[0])
+        self.dec = nn.Linear(sz[0],dim)
 
     def reparameterize(self, mu, log_var):
         std = torch.exp(log_var/2)
@@ -118,18 +113,20 @@ def relative_euclidean_distance(a, b):
     return (a-b).norm(2, dim=1) / a.norm(2, dim=1)
 
 
-def experiment_lake(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
+def experiment_lake(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
 
-    for i, setting in enumerate(settings):
+    #for i, setting in enumerate(settings):
         #print(f"experiment_dmkdc {i} threshold {setting['z_threshold']}")
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
-            X = np.concatenate((X_train, X_test), axis=0)
-            y = np.concatenate((y_train, y_test), axis=0)
+            X = [X_train, X_test]
+            y = [y_train, y_test]
 
-            N_train = int( (y==0).sum() * setting["z_ratio"] )
+            N_train = 0.3 #int( (y==0).sum() * setting["z_ratio"] )
             
-            vae = VAE(X_train.shape[1])
+            setting["z_enc_dec"] = ast.literal_eval(setting["z_enc_dec"])
+            setting["z_batch_size"] = int(setting["z_batch_size"])
+            vae = VAE(X_train.shape[1], setting["z_enc_dec"])
             optimizer = torch.optim.Adam(vae.parameters(), lr=setting["z_learning_rate"])
             data_loader_train = get_loader(X, y, setting["z_batch_size"], N_train, mode='train')
             data_loader_test = get_loader(X, y, setting["z_batch_size"], N_train, mode='test')
@@ -146,7 +143,7 @@ def experiment_lake(X_train, y_train, X_test, y_test, settings, mlflow, best=Fal
             test_enc = []
             test_labels = []
 
-            temp_loader = get_loader(X, y, N_train, N_train, mode='train')
+            temp_loader = get_loader(X, y, X_train.shape[0], N_train, mode='train')
             for _, (input_data, _)  in enumerate(temp_loader):
                 enc_1, enc, mu, log_var, o, z,  z_1, dec = vae(input_data)
                 rec_euclidean = relative_euclidean_distance(input_data, dec)
@@ -164,13 +161,17 @@ def experiment_lake(X_train, y_train, X_test, y_test, settings, mlflow, best=Fal
                 test_enc.append(enc)
                 test_labels.append(labels.numpy())
 
+
             x = train_enc[0]
-            kde = KernelDensity(kernel='gaussian', bandwidth=0.000001).fit(x)
+            x = np.nan_to_num(x, nan=0.0, posinf=1.0, neginf=-1.0)
+            #print(np.sum(np.isinf(x), axis=0))
+            kde = KernelDensity(kernel='gaussian', bandwidth=0.00001).fit(x)
             score = kde.score_samples(x)
 
             test_score = []
             for i in range(len(test_enc)):
-                score = kde.score_samples(test_enc[i])
+                testenc = np.nan_to_num(test_enc[i], nan=0.0, posinf=1.0, neginf=-1.0)
+                score = kde.score_samples(testenc)
                 test_score.append(score)
             test_labels = np.concatenate(test_labels,axis=0)
             test_score = np.concatenate(test_score,axis=0)
@@ -188,10 +189,11 @@ def experiment_lake(X_train, y_train, X_test, y_test, settings, mlflow, best=Fal
             mlflow.log_metrics(metrics)
 
             if best:
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'), pred, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'))
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'), test_score, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'))
+                mlflow.log_params({"w_best": best})
+                f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
+                np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=pred, scores=test_score)
+                mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))
+                f.close()
 
-            print(f"experiment_lake {i} ratio {setting['z_ratio']}")
-            print(f"experiment_lake {i} metrics {metrics}")
+            print(f"experiment_lake: lr {setting['z_learning_rate']} metrics {metrics}")
+

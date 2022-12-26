@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "2022-1-anomaly-detection-autoencoder"
+name = "Incremenal-anomaly-detection"
 version = "0.1.0"
 description = ""
 authors = ["joag <joaggi@gmail.com>"]

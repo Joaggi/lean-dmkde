@@ -192,7 +192,7 @@ class SOS(BaseDetector):
             Hdiff = H - logU
             tries = 0
             while (np.isnan(Hdiff) or np.abs(
-                    Hdiff) > self.eps) and tries < 5000:
+                    Hdiff) > self.eps) and tries < 500:#0:
                 if np.isnan(Hdiff):
                     beta[i] = beta[i] / 10.0
                 # If not, increase or decrease precision
@@ -215,6 +215,7 @@ class SOS(BaseDetector):
 
             # Set the final row of A
             A[i, np.concatenate((np.r_[0:i], np.r_[i + 1:n]))] = thisA
+            print(tries)
 
         return A
 

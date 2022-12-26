@@ -3,7 +3,6 @@ import qmc.tf.models as models
 
 import numpy as np
 from calculate_metrics import calculate_metrics
-from find_best_threshold import find_best_threshold
 from sklearn.kernel_approximation import RBFSampler
 
 import tensorflow as tf
@@ -48,9 +47,10 @@ class QFeatureMapAdaptRFF(layers.QFeatureMapRFF):
         self.built = True
 
     def call(self, inputs):
-        vals = tf.sqrt(2 * self.gamma_val) * tf.matmul(inputs, self.rff_weights) + self.offset
+        inps = tf.cast(inputs, tf.float32)
+        vals = tf.sqrt(2 * self.gamma_val) * tf.matmul(inps, self.rff_weights) + self.offset
         vals = tf.cos(vals)
-        vals = vals * tf.sqrt(2. / self.dim)
+        vals = vals * tf.cast(tf.sqrt(2. / self.dim), tf.float32)
         norms = tf.linalg.norm(vals, axis=-1)
         psi = vals / tf.expand_dims(norms, axis=-1)
         return psi
@@ -68,6 +68,7 @@ class DMRFF(tf.keras.Model):
     def call(self, inputs):
         x1 = inputs[:, 0]
         x2 = inputs[:, 1]
+        x1, x2 = tf.cast(x1,tf.float32), tf.cast(x2,tf.float32)
         phi1 = self.rff_layer(x1)
         phi2 = self.rff_layer(x2)
         dot = tf.einsum('...i,...i->...', phi1, phi2) 
@@ -84,9 +85,9 @@ def gauss_kernel_arr(x, y, gamma):
     return np.exp(-gamma * np.linalg.norm(x - y, axis=1) ** 2)
 
 
-def experiment_dmkde_adp(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
+def experiment_dmkde_adp(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
 
-    for i, setting in enumerate(settings):
+  #  for i, setting in enumerate(settings):
         
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
@@ -113,18 +114,18 @@ def experiment_dmkde_adp(X_train, y_train, X_test, y_test, settings, mlflow, bes
 
             dmrff.fit(x_train_rff, y_train_rff, epochs=20, verbose=0)
             fm_x = dmrff.rff_layer
-            
+            #fm_x = tf.cast(fm_x, tf.float32)
 
             qmd = models.QMDensity(fm_x, setting["z_rff_components"])
-            qmd.compile()            
+            qmd.compile()
             qmd.fit(np.array(X), epochs=1, batch_size=setting["z_batch_size"], verbose=1)
             
             y_scores = qmd.predict(X_test)
 
-            if np.isclose(setting["z_threshold"], 0.0, rtol=0.0):
-                thresh = find_best_threshold(y_test, y_scores)
-                setting["z_threshold"] = thresh
+            g = np.sum(y_test) / len(y_test)
+            print("Outlier percentage", g)
 
+            if np.allclose(setting["z_threshold"], 0.0): setting["z_threshold"] = np.percentile(y_scores, int(g*100))
             preds = (y_scores < setting["z_threshold"]).astype(int)
             metrics = calculate_metrics(y_test, preds, y_scores, setting["z_run_name"])
 
@@ -132,10 +133,11 @@ def experiment_dmkde_adp(X_train, y_train, X_test, y_test, settings, mlflow, bes
             mlflow.log_metrics(metrics)
 
             if best:
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'), preds, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'))
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'), y_scores, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'))
+                mlflow.log_params({"w_best": best})
+                f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
+                np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=preds, scores=y_scores)
+                mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))
+                f.close()
 
-            print(f"experiment_dmkde_adp {i} metrics {metrics}")
-            print(f"experiment_dmkde_adp {i} threshold {setting['z_threshold']}")
+            print(f"experiment_dmkde_adp {setting['z_gamma']} metrics {metrics}")
+            print(f"experiment_dmkde_adp {setting['z_gamma']} threshold {setting['z_threshold']}")

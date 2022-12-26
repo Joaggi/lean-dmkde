@@ -143,4 +143,3 @@ class Leand(keras.Model):
             "reconstruction_loss": self.reconstruction_loss_tracker.result(),
             "probs_loss": self.probs_loss_tracker.result(),
         }
-

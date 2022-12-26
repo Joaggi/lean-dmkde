@@ -2,12 +2,11 @@ import numpy as np
 from sklearn.neighbors import KernelDensity
 
 from calculate_metrics import calculate_metrics
-from find_best_threshold import find_best_threshold
 
 
-def experiment_kde(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
+def experiment_kde(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
 
-    for i, setting in enumerate(settings):
+    #for i, setting in enumerate(settings):
 
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
@@ -27,11 +26,10 @@ def experiment_kde(X_train, y_train, X_test, y_test, settings, mlflow, best=Fals
             test_score = np.concatenate(test_score,axis=0)
 
             g = np.sum(y_test) / len(y_test)
-            print("Outlier percentage", g)
+            #print("Outlier percentage", g)
 
-            thresh = np.percentile(test_score, int(g*100))
-            pred = (test_score < thresh).astype(int)
-            setting["z_threshold"] = thresh
+            if np.allclose(setting["z_threshold"], 0.0): setting["z_threshold"] = np.percentile(test_score, int(g*100))
+            pred = (test_score < setting["z_threshold"]).astype(int)
             
             metrics = calculate_metrics(y_test, pred, test_score, setting["z_run_name"])
 
@@ -39,10 +37,11 @@ def experiment_kde(X_train, y_train, X_test, y_test, settings, mlflow, best=Fals
             mlflow.log_metrics(metrics)
 
             if best:
-                np.savetxt(('/home/oabustosb/mlflow-persistence/artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'), pred, delimiter=',')
-                mlflow.log_artifact(('/home/oabustosb/mlflow-persistence/artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'))
-                np.savetxt(('/home/oabustosb/mlflow-persistence/artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'), test_score, delimiter=',')
-                mlflow.log_artifact(('/home/oabustosb/mlflow-persistence/artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'))
+                mlflow.log_params({"w_best": best})
+                f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
+                np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=y_test_pred, scores=y_scores)
+                mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))
+                f.close()
 
             print(f"experiment_kde {i} metrics {metrics}")
             print(f"experiment_kde {i} threshold {setting['z_threshold']}")

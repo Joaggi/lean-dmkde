@@ -4,11 +4,10 @@ from sklearn.svm import OneClassSVM
 from calculate_metrics import calculate_metrics
 
 
-def experiment_oneclass(X_train, y_train, X_test, y_test, settings, mlflow, best=False):
+def experiment_oneclass(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
     
-    for i, setting in enumerate(settings):
+    #for i, setting in enumerate(settings):
 
-        #print(f"experiment_dmkdc {i} setting {setting}")
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
             model = OneClassSVM(kernel="rbf", gamma=setting["z_gamma"], 
@@ -17,15 +16,17 @@ def experiment_oneclass(X_train, y_train, X_test, y_test, settings, mlflow, best
             y_test_pred = model.predict(X_test)
             y_scores = model.decision_function(X_test)
         
-            metrics = calculate_metrics(y_test, y_test_pred)
+            metrics = calculate_metrics(y_test, y_test_pred, y_scores, setting["z_algorithm"])
 
             mlflow.log_params(setting)
             mlflow.log_metrics(metrics)
 
             if best:
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'), y_test_pred, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-preds.csv'))
-                np.savetxt(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'), y_scores, delimiter=',')
-                mlflow.log_artifact(('artifacts/'+setting["z_name_of_experiment"]+'-scores.csv'))
+                mlflow.log_params({"w_best": best})
+                f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
+                np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=y_test_pred, scores=y_scores)
+                mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))
+                f.close()
 
-            print(f"experiment_dmkdc {i} metrics {metrics}")
+            nu, gamma = setting["z_nu"], setting["z_gamma"]
+            print(f"experiment: contamination {nu}, gamma {gamma} - metrics {metrics}")

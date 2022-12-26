@@ -16,7 +16,7 @@ def mlflow_create_experiment(name_of_experiment, server="local", tracking_uri="t
         mlflow_wrapper.set_experiment(mlflow, name_of_experiment)
 
     else:
-        print(os.environ)
+
         tracking_uri = os.environ["MLFLOW_TRACKING_URI"]
         artifact_uri = os.environ["MLFLOW_ARTIFACT_URI"]
 
