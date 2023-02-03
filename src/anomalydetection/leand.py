@@ -11,19 +11,19 @@ class Leand(keras.Model):
         input_enc: dimension of the encoder
         dim_x: dimension of the input quantum feature map
         dim_y: dimension of the output representation
-        num_eig: Number of eigenvectors used to represent the density matrix. 
+        num_eig: Number of eigenvectors used to represent the density matrix.
                  a value of 0 or less implies num_eig = dim_x * dim_y
         gamma: float. Gamma parameter of the RBF kernel to be approximated.
         random_state: random number generator seed.
   """
-  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None, 
+  def __init__(self, input_size, input_enc, dim_x, num_eig=0, gamma=1, alpha=1, encoder = None, decoder = None,
           layer=tf.keras.layers.LeakyReLU(), \
         enable_reconstruction_metrics = True, random_state=None):
     super(Leand, self).__init__()
     self.alpha = alpha
     #regularizer = None
     regularizer = tf.keras.regularizers.l1(10e-5)
-    self.enable_reconstruction_metrics = enable_reconstruction_metrics 
+    self.enable_reconstruction_metrics = enable_reconstruction_metrics
 
     if encoder == None:
         self.encoder = tf.keras.Sequential([
@@ -32,13 +32,13 @@ class Leand(keras.Model):
           keras.layers.Dense(input_enc, activation=layer, activity_regularizer=regularizer)])
     else:
         self.encoder = encoder
-    if decoder == None: 
+    if decoder == None:
         self.decoder = tf.keras.Sequential([
           keras.layers.Dense(32, activation=layer, activity_regularizer=regularizer),
           keras.layers.Dense(64, activation=layer, activity_regularizer=regularizer),
           keras.layers.Dense(input_size, activation="sigmoid", activity_regularizer=regularizer)])
     else:
-        self.decoder = decoder 
+        self.decoder = decoder
 
     aff_dimension = input_enc + (2 if self.enable_reconstruction_metrics else 0)
 
@@ -57,7 +57,7 @@ class Leand(keras.Model):
         name="reconstruction_loss"
     )
     self.probs_loss_tracker = keras.metrics.Mean(name="probs_loss")
-    
+
   @property
   def metrics(self):
       return [
@@ -74,26 +74,26 @@ class Leand(keras.Model):
 
       print("call: decoder")
       reconstruction = self.decoder(encoded)
-      
+
       if self.enable_reconstruction_metrics == True:
           reconstruction_loss = keras.losses.binary_crossentropy(X, reconstruction)
-          
+
           cosine_similarity = keras.losses.cosine_similarity(X, reconstruction)
 
-          encoded_kde = keras.layers.Concatenate(axis=1)([encoded, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])])  
+          encoded_kde = keras.layers.Concatenate(axis=1)([encoded, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])])
       else:
           encoded_kde = encoded
-      
+
       print("call: fm_x")
       rff = self.fm_x(encoded_kde)
       print("call: qmd")
       probs = self.qmd(rff)
-      
+
       return [probs, reconstruction]
 
   def compute_errors(self, X, probs, reconstruction):
     print("train_step: probs_loss")
-    probs_loss = -self.alpha * tf.reduce_sum(tf.math.log(probs))
+    probs_loss = -self.alpha * tf.reduce_mean(tf.math.log(probs))
 
     print("train_step: reconstruction_loss")
     #tf.print(X.shape)
@@ -119,7 +119,7 @@ class Leand(keras.Model):
     self.probs_loss_tracker.update_state(probs_loss)
 
     return {m.name: m.result() for m in self.metrics}
-    
+
 
   def train_step(self, data):
         print("data")
@@ -137,7 +137,7 @@ class Leand(keras.Model):
         self.total_loss_tracker.update_state(total_loss)
         self.reconstruction_loss_tracker.update_state(reconstruction_loss)
         self.probs_loss_tracker.update_state(probs_loss)
-        
+
         return {
             "loss": self.total_loss_tracker.result(),
             "reconstruction_loss": self.reconstruction_loss_tracker.result(),
