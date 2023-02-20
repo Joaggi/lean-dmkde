@@ -25,7 +25,7 @@ for database in databases:
 
     prod_settings = {
         "z_rff_components": [1000, 2000, 4000],
-        "z_gamma" : [3*(2**i) for i in range(-9,6)],
+        "z_gamma" : [2**i for i in range(-9,8)],
     }
 
     m, best_params = hyperparameter_search("dmkde_adp", database, parent_path, prod_settings, settings)
