@@ -1,9 +1,9 @@
 import tensorflow as tf
-import pylab as pl
+#import pylab as pl
 from sklearn.kernel_approximation import RBFSampler
 import qmc.tf.layers as layers
 import qmc.tf.models as models
-import numpy as np
+import numpy as np 
 from sklearn.model_selection import train_test_split
 
 
@@ -66,12 +66,12 @@ class DMRFF(tf.keras.Model):
         x2 = inputs[:, 1, :]
         phi1 = self.rff_layer(x1)
         phi2 = self.rff_layer(x2)
-        dot = tf.einsum('...i,...i->...', phi1, phi2, optimize='optimal')
+        dot = tf.einsum('...i,...i->...', phi1, phi2, optimize='optimal') 
         return dot
 
 def calc_rbf(dmrff, x1, x2):
-    return dmrff.predict(np.concatenate([x1[:, np.newaxis, ...],
-                                         x2[:, np.newaxis, ...]],
+    return dmrff.predict(np.concatenate([x1[:, np.newaxis, ...], 
+                                         x2[:, np.newaxis, ...]], 
                                         axis=1),
                          batch_size=256)
 
@@ -83,9 +83,9 @@ def build_features(X):
     num_samples = 1000000
     rnd_idx1 = np.random.uniform(-3*X_train.std() + X_train.min(), 3*X_train.std() + X_train.max(),size=(num_samples, X_train.shape[1]))
     rnd_idx2 = np.random.uniform(-3*X_train.std() + X_train.min(), 3*X_train.std() + X_train.max(),size=(num_samples, X_train.shape[1]))
-    x_train_rff = np.concatenate([rnd_idx1[:, np.newaxis, ...],
-                              rnd_idx2[:, np.newaxis, ...]],
-                             axis=1)
+    x_train_rff = np.concatenate([rnd_idx1[:, np.newaxis, ...], 
+                              rnd_idx2[:, np.newaxis, ...]], 
+                             axis=1) 
 
     #dists = np.linalg.norm(x_train_rff[:, 0, ...] - x_train_rff[:, 1, ...], axis=1)
     #print(dists.shape)
@@ -93,9 +93,9 @@ def build_features(X):
     #print(np.quantile(dists, 0.001))
     rnd_idx1 = np.random.uniform(-3*X_test.std() + X_test.min(), 3*X_test.std() + X_test.max(),size=(num_samples, X_test.shape[1]))
     rnd_idx2 = np.random.uniform(-3*X_test.std() + X_test.min(), 3*X_test.std() + X_test.max(),size=(num_samples, X_test.shape[1]))
-    x_test_rff = np.concatenate([rnd_idx1[:, np.newaxis, ...],
-                              rnd_idx2[:, np.newaxis, ...]],
-                             axis=1)
+    x_test_rff = np.concatenate([rnd_idx1[:, np.newaxis, ...], 
+                              rnd_idx2[:, np.newaxis, ...]], 
+                             axis=1) 
 
     #x_train_rff = np.concatenate([np.random.uniform(-3 + X_train.min(), 3 + X_train.max(), \
     #        size=(X_train.shape[0], X_train.shape[1])), X_train])
@@ -111,7 +111,7 @@ def build_model(setting, x_train_rff, x_test_rff):
     sigma = setting["z_sigma"]
     gamma= 1/ (2*sigma**2)
 
-    if setting["z_enable_reconstruction_metrics"]:
+    if setting["z_enable_reconstruction_metrics"]: 
        dimension=setting["z_adaptive_input_dimension"]+2
     else:
        dimension=setting["z_adaptive_input_dimension"]
@@ -131,13 +131,12 @@ def build_model(setting, x_train_rff, x_test_rff):
     dmrff.evaluate(x_test_rff, y_test_rff, batch_size=setting["z_adaptive_batch_size"])
 
     history = dmrff.fit(x_train_rff, y_train_rff, validation_split=0.1, epochs=setting["z_adaptive_epochs"], batch_size=setting["z_adaptive_batch_size"])
-
+    
     dm_rbf = calc_rbf(dmrff, x_test_rff[:, 0, ...], x_test_rff[:, 1, ...])
     #pl.plot(y_test_rff, dm_rbf, '.')
     dmrff.evaluate(x_test_rff, y_test_rff, batch_size=setting["z_adaptive_batch_size"])
 
     return dmrff.rff_layer, history
-
 
 def fit_transform(setting, X):
     x_train_rff, x_test_rff = build_features(X)

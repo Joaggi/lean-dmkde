@@ -15,7 +15,7 @@ def generate_product_dict(original_dict, product_dict):
     settings = [dict(original_dict, **current_dict) for current_dict in array_product]
 
     
-    if "z_random_search" in original_dict and  original_dict["z_random_search"] == True:
+    if "z_random_search" in original_dict:
         print("Random search enable")
         settings_length = len(settings)
         np.random.seed(original_dict["z_random_search_random_state"])

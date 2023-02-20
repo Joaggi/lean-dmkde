@@ -3,12 +3,22 @@ import qmc.tf.models as models
 
 import numpy as np
 from calculate_metrics import calculate_metrics
-from sklearn.kernel_approximation import RBFSampler
 
 import tensorflow as tf
+from sklearn.decomposition import PCA
+from sklearn.kernel_approximation import RBFSampler
 
 np.random.seed(42)
 tf.random.set_seed(42)
+
+
+def pca_right_comps(X):
+    all_pca = PCA(n_components=min(X.shape))
+    all_pca.fit(X)
+    variance_expl = all_pca.explained_variance_ratio_
+    cum_var_exp = np.cumsum(variance_expl)
+    varsums = [ cve>0.98 for cve in cum_var_exp ]
+    return varsums.index(True)
 
 
 class QFeatureMapAdaptRFF(layers.QFeatureMapRFF):
@@ -85,29 +95,39 @@ def gauss_kernel_arr(x, y, gamma):
     return np.exp(-gamma * np.linalg.norm(x - y, axis=1) ** 2)
 
 
-def experiment_dmkde_adp(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
 
-  #  for i, setting in enumerate(settings):
-        
+def experiment_pca_dmkde(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
+
+    #for i, setting in enumerate(settings):
+
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
             X = []
-            for j in range(len(y_train)):
-                if y_train[j] == 0: X.append(X_train[j])
-            x_train = np.array(X)
+            for i in range(len(y_train)):
+                if y_train[i] == 0: X.append(X_train[i])
+            X = np.array(X)
 
-            dmrff = DMRFF(dim_x=X_train.shape[1], num_rff=setting["z_rff_components"], 
+            comps = pca_right_comps(X)
+            pca = PCA(n_components=comps)
+            print(f"For PCA, {comps} components will be used.")
+            Xpca = pca.fit_transform(X)
+            Xpcatest = pca.transform(X_test)
+            setting["z_pca_components"] = comps
+
+
+            dmrff = DMRFF(dim_x=comps, num_rff=setting["z_rff_components"], 
                           gamma=setting["z_gamma"], random_state=setting["z_random_state"])
             dmrff.compile(optimizer="adam", loss='mse')
+            
 
             num_samples = setting["z_num_samples"]
-            rnd_idx1 = np.random.randint(x_train.shape[0],size=(num_samples, ))
-            rnd_idx2 = np.random.randint(x_train.shape[0],size=(num_samples, ))    
-            x_train_rff = np.concatenate([x_train[rnd_idx1][:, np.newaxis, ...], x_train[rnd_idx2][:, np.newaxis, ...]], axis=1)
+            rnd_idx1 = np.random.randint(Xpca.shape[0],size=(num_samples, ))
+            rnd_idx2 = np.random.randint(Xpca.shape[0],size=(num_samples, ))    
+            x_train_rff = np.concatenate([Xpca[rnd_idx1][:, np.newaxis, ...], Xpca[rnd_idx2][:, np.newaxis, ...]], axis=1)
 
-            rnd_idx1 = np.random.randint(X_test.shape[0],size=(num_samples, ))
-            rnd_idx2 = np.random.randint(X_test.shape[0],size=(num_samples, ))
-            x_test_rff = np.concatenate([X_test[rnd_idx1][:, np.newaxis, ...], X_test[rnd_idx2][:, np.newaxis, ...]], axis=1)
+            rnd_idx1 = np.random.randint(Xpcatest.shape[0],size=(num_samples, ))
+            rnd_idx2 = np.random.randint(Xpcatest.shape[0],size=(num_samples, ))
+            x_test_rff = np.concatenate([Xpcatest[rnd_idx1][:, np.newaxis, ...], Xpcatest[rnd_idx2][:, np.newaxis, ...]], axis=1)
 
             y_train_rff = gauss_kernel_arr(x_train_rff[:, 0, ...], x_train_rff[:, 1, ...], gamma=setting["z_gamma"])
             #y_test_rff = gauss_kernel_arr(x_test_rff[:, 0, ...], x_test_rff[:, 1, ...], gamma=setting["z_gamma"])
@@ -116,14 +136,13 @@ def experiment_dmkde_adp(X_train, y_train, X_test, y_test, setting, mlflow, best
             fm_x = dmrff.rff_layer
             #fm_x = tf.cast(fm_x, tf.float32)
 
-            #qmd = models.QMDensity(fm_x, setting["z_rff_components"])
-            qmd = models.QMDensitySGD(x_train.shape[1], dim_x=setting["z_rff_components"], num_eig=setting["z_num_eigs"], 
-                                      gamma=setting["z_gamma"], random_state=setting["z_random_state"])
+            qmd = models.QMDensity(fm_x, setting["z_rff_components"])
+            #qmd = models.QMDensitySGD(Xpca.shape[1], dim_x=setting["z_rff_components"], num_eig=setting["z_num_eigs"],
+            #                          gamma=setting["z_gamma"], random_state=setting["z_random_state"])
             qmd.compile()
-            #qmd.fit(np.array(X), epochs=1, batch_size=setting["z_batch_size"], verbose=1)
-            qmd.fit(np.array(X), epochs=setting["z_eig_epochs"], batch_size=setting["z_batch_size"], verbose=1)
+            qmd.fit(Xpca, epochs=1, batch_size=setting["z_batch_size"], verbose=1)
             
-            y_scores = qmd.predict(X_test)
+            y_scores = qmd.predict(Xpcatest)
 
             g = np.sum(y_test) / len(y_test)
             print("Outlier percentage", g)
@@ -142,5 +161,5 @@ def experiment_dmkde_adp(X_train, y_train, X_test, y_test, setting, mlflow, best
                 mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))
                 f.close()
 
-            print(f"experiment_dmkde_adp {setting['z_gamma']} metrics {metrics}")
-            print(f"experiment_dmkde_adp {setting['z_gamma']} threshold {setting['z_threshold']}")
+            print(f"experiment_pca_dmkde {setting['z_gamma']} metrics {metrics}")
+            print(f"experiment_pca_dmkde {setting['z_gamma']} threshold {setting['z_threshold']}")

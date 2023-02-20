@@ -8,6 +8,8 @@ from experiment_leand import experiment_leand
 from experiment_pyod import experiment_pyod
 from experiment_kde import experiment_kde
 from experiment_autoencoder import experiment_ae
+from experiment_pca import experiment_pca_dmkde
+from experiment_leand_tests import experiment_leand_aenotrain
 
 
 def make_experiment(algorithm, X_train, y_train, X_test, y_test, settings, mlflow, best=False):
@@ -32,4 +34,7 @@ def make_experiment(algorithm, X_train, y_train, X_test, y_test, settings, mlflo
         experiment_kde(X_train, y_train, X_test, y_test, settings, mlflow, best)
     if algorithm == "autoencoder":
         experiment_ae(X_train, y_train, X_test, y_test, settings, mlflow, best)
-     
+    if algorithm == "pca_dmkde":
+        experiment_pca_dmkde(X_train, y_train, X_test, y_test, settings, mlflow, best)
+    if algorithm == "leand_aenotrain":
+        experiment_leand_aenotrain(X_train, y_train, X_test, y_test, settings, mlflow, best)

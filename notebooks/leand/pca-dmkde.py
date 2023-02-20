@@ -18,15 +18,16 @@ for database in databases:
 
     settings = {
         "z_dataset": database,
-        "z_learning_rate": 1e-05,
-        "z_iter_per_epoch": 1000,
+        "z_num_samples": 10000,
+        "z_batch_size": 32,
+        "z_threshold": 0.0,
     }
 
     prod_settings = {
-        "z_batch_size": [100,200,500,1000],
-        "z_enc_dec": [ '(45,35,30)','(20,15,15)','(60,25,20)' ]
+        "z_rff_components": [4000],
+        "z_gamma" : [(2**i) for i in range(-7,7)], #8)]
     }
 
-    m, best_params = hyperparameter_search("lake", database, parent_path, prod_settings, settings)
+    m, best_params = hyperparameter_search("pca_dmkde", database, parent_path, prod_settings, settings)
 
     experiment(best_params, m, best=True)

@@ -10,10 +10,10 @@ from transform_params_to_settings import transform_params_to_settings
 def get_best_experiment(mlflow, setting):
        
     query = f"params.z_dataset='{setting['z_dataset']}'" # and params.z_run_name='NEWW_{setting['z_algorithm']}'
-    metric = "metrics.f1_score"
+    metrics = ["metrics.f1_anomalyclass", "metrics.aucroc"]
     experiment_id = mlflow.get_experiment_by_name(setting["z_run_name"]).experiment_id
     runs = mlflow_wrapper.search_runs(mlflow, experiment_id, query, ViewType.ACTIVE_ONLY, output_format="pandas")
-    best_result = runs.sort_values(metric, ascending=False).iloc[0]
+    best_result = runs.sort_values(metrics[::-1], ascending=False).iloc[0]
     
     print(best_result)
     return transform_params_to_settings(best_result)
@@ -40,7 +40,9 @@ def hyperparameter_search(algorithm, database, parent_path, prod_settings, custo
 
     #print(len(settings))
     for i, setting in enumerate(settings):
-        experiment(setting = setting, mlflow = mlflow)
+       #if i<50:
+            experiment(setting = setting, mlflow = mlflow)
+       #else: break
     
     best_exp = get_best_experiment(mlflow, setting)    
     return mlflow, best_exp

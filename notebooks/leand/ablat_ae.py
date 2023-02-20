@@ -13,7 +13,7 @@ databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "op
              "pendigits", "pima", "satellite", "satimage-2", "spambase", "vertebral", "vowels", "wbc",
              "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
 
-for database in databases:
+for database in ["cover"]:
 
     settings = {
         "z_dataset": database,

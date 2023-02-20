@@ -14,13 +14,13 @@ databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "op
              "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
 
 
-for database in databases:
+for database in databases[14:]:
 
     settings = {
         "z_dataset": database,
-        "z_batch_size": 256,
+        "z_batch_size": 128,
         "z_threshold": 0.0,
-        "z_epochs": 128,
+        "z_epochs": 60,
         "z_base_lr": 1e-2,
         "z_end_lr": 1e-7,
         "z_power": 1,
@@ -34,22 +34,21 @@ for database in databases:
         "z_adaptive_batch_size": 256,
         "z_adaptive_epochs": 32,
         "z_adaptive_random_state": 42,
-        "z_random_search": True,
-        "z_random_search_random_state": 402,
-        "z_random_search_iter": 2,
         "z_select_regularizer": 'l1',
     }
 
     prod_settings = {
-        "z_adaptive_fourier_features_enable": ['True'],
-        "z_sigma": [2**i for i in range(-7,8)],
-        "z_rff_components": [500,1000,2000],
-        "z_max_num_eigs": [0.05,0.1,0.2,0.5,1],
-        "z_sequential": ["(64,20,10,4)","(128,64,32,8)","(128,32,2)","(64,32,16)"],
-        "z_alpha": [0, 0.01, 0.1, 0.5, 0.9, 0.99, 1],
+        "z_adaptive_fourier_features_enable": ['False'],
+        "z_autoencoder_is_alone_optimized": ["True"],
+        "z_autoencoder_is_trainable": ['False'],
+        "z_sigma": [2**(i/2) for i in range(-7,8)], 
+        "z_rff_components": [1000, 2000, 4000],
+        "z_max_num_eigs": [1],
+        "z_sequential": ["(40,20,10,4)","(64,32,16,8)","(32,8,2)","(128,64,32)"], #["(64,20,10,4)","(128,64,32,8)","(128,32,2)","(64,32,16)"],
+        "z_alpha": [0.1], 
         "z_enable_reconstruction_metrics": ['True']
     }
 
-    m, best_params = hyperparameter_search("leand", database, parent_path, prod_settings, settings)
+    m, best_params = hyperparameter_search("leand_aenotrain", database, parent_path, prod_settings, settings)
     
     experiment(best_params, m, best=True)

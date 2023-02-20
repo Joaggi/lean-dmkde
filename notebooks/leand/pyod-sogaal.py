@@ -16,17 +16,26 @@ databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "op
 
 for database in databases:
 
+    nus = []
+    if database=="spambase":
+        nus = [(i/100) for i in range(16,25)]
+    elif database in ["breastw","ionosphere","pima","satellite"]:
+        nus = [.345,.355] #[(i/100) for i in range(26,41)]
+    elif database in ["speech","thyroid","mammography","cover","optdigits","pendigits","satimage-2"]:
+        nus = [(i/100) for i in range(1,6)]
+    else:
+        nus = [(i/100) for i in range(8,16)]
+
+
     settings = {
         "z_dataset": database,
-        "z_learning_rate": 1e-05,
-        "z_iter_per_epoch": 1000,
     }
 
     prod_settings = {
-        "z_batch_size": [100,200,500,1000],
-        "z_enc_dec": [ '(45,35,30)','(20,15,15)','(60,25,20)' ]
+        "z_nu": nus,
+        "z_stop_epochs": [5*i for i in range(2,9)],
     }
 
-    m, best_params = hyperparameter_search("lake", database, parent_path, prod_settings, settings)
+    m, best_params = hyperparameter_search("pyod-sogaal", database, parent_path, prod_settings, settings)
 
     experiment(best_params, m, best=True)

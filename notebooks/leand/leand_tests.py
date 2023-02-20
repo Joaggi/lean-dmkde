@@ -20,24 +20,22 @@ for database in databases:
         "z_dataset": database,
         "z_batch_size": 256,
         "z_threshold": 0.0,
-        "z_epochs": 128,
+        "z_epochs": 200,
         "z_base_lr": 1e-2,
-        "z_end_lr": 1e-7,
+        "z_end_lr": 1e-5, #modified
         "z_power": 1,
-        "z_decay_steps": int(100),
+        "z_decay_steps": int(20),
         "z_autoencoder_epochs": int(100),
         "z_autoencoder_batch_size": int(256),
-        "z_adaptive_base_lr": 1e-2,
         "z_adaptive_end_lr": 1e-5,
-        "z_adaptive_decay_steps": 100,
+        "z_adaptive_decay_steps": 20,
         "z_adaptive_power": 1,
         "z_adaptive_batch_size": 256,
-        "z_adaptive_epochs": 32,
+        "z_adaptive_epochs": 30,
         "z_adaptive_random_state": 42,
         "z_random_search": True,
-        "z_random_search_random_state": 402,
-        "z_random_search_iter": 2,
-        "z_select_regularizer": 'l1',
+        "z_random_search_random_state": 42,
+        "z_random_search_iter": 25,
     }
 
     prod_settings = {
@@ -47,7 +45,9 @@ for database in databases:
         "z_max_num_eigs": [0.05,0.1,0.2,0.5,1],
         "z_sequential": ["(64,20,10,4)","(128,64,32,8)","(128,32,2)","(64,32,16)"],
         "z_alpha": [0, 0.01, 0.1, 0.5, 0.9, 0.99, 1],
-        "z_enable_reconstruction_metrics": ['True']
+        "z_enable_reconstruction_metrics": ['True'],
+        "z_adaptive_base_lr": [1e-2, 1e-3, 1e-4],
+        "z_select_regularizer": ['l1', 'l2', 'None']
     }
 
     m, best_params = hyperparameter_search("leand", database, parent_path, prod_settings, settings)

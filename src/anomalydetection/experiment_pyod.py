@@ -4,6 +4,8 @@ from pyod.models.copod import COPOD
 from pyod.models.loda import LODA
 from pyod.models.vae import VAE
 from pyod.models.deep_svdd import DeepSVDD
+from pyod.models.alad import ALAD
+from pyod.models.so_gaal import SO_GAAL
 
 import numpy as np
 import ast
@@ -43,6 +45,18 @@ def experiment_pyod(X_train, y_train, X_test, y_test, setting, mlflow, best=Fals
             if (runname == "pyod-deepsvdd"):
                 model = DeepSVDD(contamination=setting["z_nu"], random_state=setting["z_random_state"], 
                                  epochs=setting["z_epochs"], verbose=0)
+
+            if (runname == "pyod-alad"):
+                coder_layers = ast.literal_eval(setting["z_coder_layers"])
+                disc_xx_layers, disc_zz_layers = ast.literal_eval(setting["z_disc_xx"]), ast.literal_eval(setting["z_disc_zz"])
+                print(coder_layers)
+                model = ALAD(epochs=setting["z_epochs"], latent_dim=setting["z_latent_dim"], add_recon_loss=ast.literal_eval(setting["z_add_recon_loss"]),
+                             dec_layers=coder_layers, enc_layers=coder_layers[::-1], spectral_normalization=False, 
+                             disc_xx_layers=disc_xx_layers, disc_zz_layers=disc_zz_layers, disc_xz_layers=disc_xx_layers, 
+                             preprocessing=True, batch_size=setting["z_batch_size"], contamination=setting["z_nu"])
+
+            if (runname == "pyod-sogaal"):
+                model = SO_GAAL(stop_epochs=setting["z_stop_epochs"], contamination=setting["z_nu"])
 
 
             model.fit(X_train)
