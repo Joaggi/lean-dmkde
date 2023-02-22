@@ -78,30 +78,28 @@ def calc_rbf(dmrff, x1, x2):
 def gauss_kernel_arr(x, y, gamma):
     return np.exp(-gamma * np.linalg.norm(x - y, axis=1) ** 2)
 
-def build_features(X):
+def build_features(X, num_samples):
     X_train, X_test = train_test_split(X)
-    num_samples = 1000000
-    rnd_idx1 = np.random.uniform(-3*X_train.std() + X_train.min(), 3*X_train.std() + X_train.max(),size=(num_samples, X_train.shape[1]))
-    rnd_idx2 = np.random.uniform(-3*X_train.std() + X_train.min(), 3*X_train.std() + X_train.max(),size=(num_samples, X_train.shape[1]))
-    x_train_rff = np.concatenate([rnd_idx1[:, np.newaxis, ...], 
-                              rnd_idx2[:, np.newaxis, ...]], 
-                             axis=1) 
 
+    random_samples = np.random.uniform(-3*X_train.std() + X_train.min(), 3*X_train.std() +
+                                 X_train.max(),size=(X_train.shape[0]*2, X_train.shape[1]))
+
+    X_train_random = np.concatenate([X_train, random_samples], axis=0)
+
+    rnd_idx1 = np.random.randint(X_train_random.shape[0],size=(num_samples, ))
+    rnd_idx2 = np.random.randint(X_train_random.shape[0],size=(num_samples, ))
+    x_train_rff = np.concatenate([X_train_random[rnd_idx1][:, np.newaxis, ...], 
+                              X_train_random[rnd_idx2][:, np.newaxis, ...]], 
+                             axis=1)
     #dists = np.linalg.norm(x_train_rff[:, 0, ...] - x_train_rff[:, 1, ...], axis=1)
     #print(dists.shape)
     #pl.hist(dists)
     #print(np.quantile(dists, 0.001))
-    rnd_idx1 = np.random.uniform(-3*X_test.std() + X_test.min(), 3*X_test.std() + X_test.max(),size=(num_samples, X_test.shape[1]))
-    rnd_idx2 = np.random.uniform(-3*X_test.std() + X_test.min(), 3*X_test.std() + X_test.max(),size=(num_samples, X_test.shape[1]))
-    x_test_rff = np.concatenate([rnd_idx1[:, np.newaxis, ...], 
-                              rnd_idx2[:, np.newaxis, ...]], 
-                             axis=1) 
-
-    #x_train_rff = np.concatenate([np.random.uniform(-3 + X_train.min(), 3 + X_train.max(), \
-    #        size=(X_train.shape[0], X_train.shape[1])), X_train])
-
-    #x_test_rff = np.concatenate([np.random.uniform(-3 + X_test.min(), 3 + X_test.max(), \
-    #        size=(X_test.shape[0], X_test.shape[1])), X_test])
+    rnd_idx1 = np.random.randint(X_test.shape[0],size=(num_samples, ))
+    rnd_idx2 = np.random.randint(X_test.shape[0],size=(num_samples, ))
+    x_test_rff = np.concatenate([X_test[rnd_idx1][:, np.newaxis, ...], 
+                              X_test[rnd_idx2][:, np.newaxis, ...]], 
+                             axis=1)
     print("AFF sizes:", x_train_rff.shape, '-', x_test_rff.shape)
     return x_train_rff, x_test_rff
 
@@ -130,15 +128,18 @@ def build_model(setting, x_train_rff, x_test_rff):
     dmrff.compile(optimizer=opt, loss='mse')
     dmrff.evaluate(x_test_rff, y_test_rff, batch_size=setting["z_adaptive_batch_size"])
 
-    history = dmrff.fit(x_train_rff, y_train_rff, validation_split=0.1, epochs=setting["z_adaptive_epochs"], batch_size=setting["z_adaptive_batch_size"])
+    validation_split = 0.2 if setting["z_best"] == False else 0.001
+
+    history = dmrff.fit(x_train_rff, y_train_rff, validation_split=validation_split, verbose=setting["z_verbose"],
+                        epochs=setting["z_adaptive_epochs"], batch_size=setting["z_adaptive_batch_size"])
     
     dm_rbf = calc_rbf(dmrff, x_test_rff[:, 0, ...], x_test_rff[:, 1, ...])
     #pl.plot(y_test_rff, dm_rbf, '.')
-    dmrff.evaluate(x_test_rff, y_test_rff, batch_size=setting["z_adaptive_batch_size"])
+    print(dmrff.evaluate(x_test_rff, y_test_rff, batch_size=setting["z_adaptive_batch_size"]))
 
     return dmrff.rff_layer, history
 
 def fit_transform(setting, X):
-    x_train_rff, x_test_rff = build_features(X)
+    x_train_rff, x_test_rff = build_features(X, setting["z_adaptive_num_of_samples"])
 
     return build_model(setting, x_train_rff, x_test_rff)

@@ -5,7 +5,7 @@ import ast
 import numpy as np
 import tensorflow as tf
 from calculate_metrics import calculate_metrics
-from calculate_eigs import calculate_eigs
+#from calculate_eigs import calculate_eigs
 from encoder_decoder_creator import encoder_decoder_creator
 
 import tensorflow as tf

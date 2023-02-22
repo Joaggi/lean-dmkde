@@ -5,7 +5,7 @@ import numpy as np
 import ast
 import tensorflow as tf
 from calculate_metrics import calculate_metrics
-from calculate_eigs import calculate_eigs
+#from calculate_eigs import calculate_eigs
 from encoder_decoder_creator import encoder_decoder_creator
 
 import tensorflow as tf
@@ -33,15 +33,26 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                 setting["z_adaptive_input_dimension"] = setting["z_sequential"][-1]
                 setting["z_sequential"] = setting["z_sequential"][:-1]
             
-            setting["z_layer"] = tf.keras.layers.LeakyReLU()
+            if setting["z_layer_name"] == "tanh":
+                setting["z_layer"] = tf.keras.activations.tanh
+            else:
+                setting["z_layer"] = tf.keras.layers.LeakyReLU()
 
-            if setting["z_select_regularizer"] == "l1": setting["z_regularizer"] = tf.keras.regularizers.l1(10e-5)
-            elif setting["z_select_regularizer"] == "l2": setting["z_regularizer"] = tf.keras.regularizers.l2(10e-5)
+
+            if setting["z_select_regularizer"] == "l1": 
+                setting["z_regularizr"] = tf.keras.regularizers.l1(setting["z_select_regularizer_value"])
+            elif setting["z_select_regularizer"] == "l2":
+                setting["z_regularizer"] = tf.keras.regularizers.l2(setting["z_select_regularizer_value"])
             else: setting["z_regularizer"] = None
+
             print('Regularizer:', setting["z_regularizer"])
 
             setting["z_enable_reconstruction_metrics"] = ast.literal_eval(setting["z_enable_reconstruction_metrics"])
             setting["z_adaptive_fourier_features_enable"] = ast.literal_eval(setting["z_adaptive_fourier_features_enable"])
+            
+            validation_split = 0.2 if setting["z_best"] == False else 0.001
+
+            mlflow.log_params(setting)
 
             polinomial_decay = tf.keras.optimizers.schedules.PolynomialDecay(setting["z_base_lr"], \
                 setting["z_decay_steps"], setting["z_end_lr"], power=setting["z_power"])
@@ -77,10 +88,10 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                 autoencoder.compile(optimizer=optimizer, loss='mse')
 
                 history = autoencoder.fit(X, X,
-                          validation_split=0.1, 
+                          validation_split=validation_split, 
                           epochs=setting["z_autoencoder_epochs"], 
                           batch_size=setting["z_autoencoder_batch_size"],
-                          shuffle=True, verbose=0)
+                          shuffle=True, verbose=setting["z_verbose"])
                 print(history.history.keys())
                 encoded_data = autoencoder.encoder(X)
                 for epoch, value in enumerate(history.history["loss"]):
@@ -112,10 +123,10 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
 
             history = leand_alg.fit(X, X, 
-                      validation_split=0.2,
+                      validation_split=validation_split,
                       epochs=setting["z_epochs"], 
                       batch_size=setting["z_batch_size"],
-                      shuffle=True, verbose=0)
+                      shuffle=True, verbose=setting["z_verbose"])
 
             
             for epoch, value in enumerate(history.history["probs_loss"]):
@@ -131,16 +142,16 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             print(y_test)
             g = np.sum(y_test) / len(y_test)
             print(g)
-            setting["z_threshold"] = np.percentile(y_test_pred, int(g*100))
+            if setting["z_best"] == False:
+                setting["z_threshold"] = np.percentile(y_test_pred, int(g*100))
+                mlflow.log_param("z_threshold", setting["z_threshold"])
 
             preds = (y_test_pred < setting["z_threshold"]).astype(int)
             metrics = calculate_metrics(y_test, preds, y_test_pred, setting["z_run_name"])
 
-            mlflow.log_params(setting)
             mlflow.log_metrics(metrics)
 
             if best:
-                mlflow.log_params({"w_best": best}) 
                 f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
                 np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=preds, scores=y_test_pred)
                 mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))

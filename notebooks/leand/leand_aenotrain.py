@@ -45,8 +45,9 @@ for database in databases[14:]:
         "z_rff_components": [1000, 2000, 4000],
         "z_max_num_eigs": [1],
         "z_sequential": ["(40,20,10,4)","(64,32,16,8)","(32,8,2)","(128,64,32)"], #["(64,20,10,4)","(128,64,32,8)","(128,32,2)","(64,32,16)"],
-        "z_alpha": [0.1], 
-        "z_enable_reconstruction_metrics": ['True']
+        "z_alpha": [0.1)], 
+        "z_enable_reconstruction_metrics": ['True'],
+        "z_layer_name" : ["tanh"]
     }
 
     m, best_params = hyperparameter_search("leand_aenotrain", database, parent_path, prod_settings, settings)
