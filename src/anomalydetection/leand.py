@@ -80,7 +80,8 @@ class Leand(keras.Model):
           
           cosine_similarity = keras.losses.cosine_similarity(X, reconstruction)
 
-          encoded_kde = keras.layers.Concatenate(axis=1)([encoded, tf.reshape(reconstruction_loss, [-1, 1]), tf.reshape(cosine_similarity, [-1,1])])  
+          encoded_kde = keras.layers.Concatenate(axis=1)([encoded, tf.reshape(reconstruction_loss, [-1, 1]),
+                                                          tf.reshape(cosine_similarity, [-1,1])])  
       else:
           encoded_kde = encoded
       
@@ -103,6 +104,7 @@ class Leand(keras.Model):
     )
     print("train_step: total_loss")
     total_loss = reconstruction_loss + probs_loss
+    #total_loss = probs_loss
 
     return probs_loss, reconstruction_loss, total_loss
 

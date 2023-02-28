@@ -36,8 +36,8 @@ def hyperparameter_search(algorithm, database, parent_path, prod_settings, custo
      
     mlflow = mlflow_create_experiment(setting["z_run_name"])
 
-    print(setting)
-    print("Settings created!")
+    print(setting) 
+    print("Starting to create!")
     if custom_setting["z_random_search"]:
         settings = generate_product_dict(setting, prod_settings)
         settings = add_random_state_to_dict(settings)

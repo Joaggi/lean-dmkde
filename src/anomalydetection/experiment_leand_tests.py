@@ -112,12 +112,11 @@ def experiment_leand_aenotrain(X_train, y_train, X_test, y_test, setting, mlflow
                     mlflow.log_metric(key="adapt_val_loss", value=value, step=epoch)
 
 
-            if not setting["z_autoencoder_is_trainable"]:
+            if setting["z_autoencoder_is_trainable"] == "False":
                 for layer in leand_alg.encoder:
-                    layer.trainable = setting["z_autoencoder_is_trainable"]
+                    layer.trainable = False
                 for layer in leand_alg.decoder:
-                    layer.trainable = setting["z_autoencoder_is_trainable"]
-
+                    layer.trainable = False
 
             history = leand_alg.fit(X, X,
                       validation_split=0.2,

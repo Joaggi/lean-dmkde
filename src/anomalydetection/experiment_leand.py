@@ -38,9 +38,8 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             else:
                 setting["z_layer"] = tf.keras.layers.LeakyReLU()
 
-
             if setting["z_select_regularizer"] == "l1": 
-                setting["z_regularizr"] = tf.keras.regularizers.l1(setting["z_select_regularizer_value"])
+                setting["z_regularizer"] = tf.keras.regularizers.l1(setting["z_select_regularizer_value"])
             elif setting["z_select_regularizer"] == "l2":
                 setting["z_regularizer"] = tf.keras.regularizers.l2(setting["z_select_regularizer_value"])
             else: setting["z_regularizer"] = None
@@ -49,6 +48,10 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
             setting["z_enable_reconstruction_metrics"] = ast.literal_eval(setting["z_enable_reconstruction_metrics"])
             setting["z_adaptive_fourier_features_enable"] = ast.literal_eval(setting["z_adaptive_fourier_features_enable"])
+
+            setting["z_rff_components"] = tf.cast(setting["z_rff_components"], tf.float32)
+            setting["z_gamma"] = tf.cast(setting["z_gamma"], tf.float32)
+            setting["z_sigma"] = tf.cast(setting["z_sigma"], tf.float32)
             
             validation_split = 0.2 if setting["z_best"] == False else 0.001
 
@@ -67,39 +70,55 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
             num_eig = int(setting["z_rff_components"] * setting["z_max_num_eigs"]) 
             
-            encoder, decoder = encoder_decoder_creator(input_size=X.shape[1], input_enc=setting["z_adaptive_input_dimension"], \
-                        sequential=setting["z_sequential"], layer=setting["z_layer"], regularizer=setting["z_regularizer"])
+            encoder, decoder = encoder_decoder_creator(
+                autoencoder_type=setting["z_autoencoder_type"],
+                input_size=X.shape[1], \
+                input_enc=setting["z_adaptive_input_dimension"], \
+                sequential=setting["z_sequential"], 
+                layer=setting["z_layer"], \
+                activity_regularizer=setting["z_select_regularizer"],
+                activity_regularizer_value=setting["z_select_regularizer_value"],
+                kernel_regularizer=setting["z_kernel_regularizer"],
+                kernel_constraint=setting["z_kernel_contraint"])
 
-            aff_dimension = setting["z_adaptive_input_dimension"] + (2 if setting["z_enable_reconstruction_metrics"] else 0)
+            aff_dimension = setting["z_adaptive_input_dimension"] + \
+                    (2 if setting["z_enable_reconstruction_metrics"] else 0)
 
             leand_alg = leand.Leand(X.shape[1], setting["z_adaptive_input_dimension"], \
-                        setting["z_rff_components"], num_eig=num_eig, gamma=setting["z_gamma"], alpha=setting["z_alpha"], \
+                        setting["z_rff_components"], num_eig=num_eig, gamma=setting["z_gamma"], \
+                        alpha=setting["z_alpha"], \
                         layer=setting["z_layer"], encoder=encoder, decoder=decoder, \
                         enable_reconstruction_metrics=setting["z_enable_reconstruction_metrics"])
 
             leand_alg.compile(optimizer)
             #eig_vals = leand_alg.set_rho(rho)
 
-            if setting["z_adaptive_fourier_features_enable"] == True:
-                autoencoder = anomaly_detector.AnomalyDetector(X.shape[1], setting["z_adaptive_input_dimension"], \
+            if setting["z_autoencoder_is_alone_optimized"] == True or \
+                        setting["z_adaptive_fourier_features_enable"] == True:
+
+                autoencoder = anomaly_detector.AnomalyDetector(X.shape[1], \
+                           setting["z_adaptive_input_dimension"], \
                          layer = setting["z_layer"], \
                          regularizer = setting["z_regularizer"], encoder=encoder, decoder=decoder)
 
                 autoencoder.compile(optimizer=optimizer, loss='mse')
 
                 history = autoencoder.fit(X, X,
-                          validation_split=validation_split, 
-                          epochs=setting["z_autoencoder_epochs"], 
+                          validation_split=0.2,
+                          epochs=setting["z_autoencoder_epochs"],
                           batch_size=setting["z_autoencoder_batch_size"],
-                          shuffle=True, verbose=setting["z_verbose"])
-                print(history.history.keys())
+                          shuffle=True, verbose=0)
+
                 encoded_data = autoencoder.encoder(X)
+                               
                 for epoch, value in enumerate(history.history["loss"]):
                     mlflow.log_metric(key="ae_loss", value=value, step=epoch)
                 for epoch, value in enumerate(history.history["val_loss"]):
                     mlflow.log_metric(key="ae_val_loss", value=value, step=epoch)
 
-                if setting["z_enable_reconstruction_metrics"]: 
+            if setting["z_adaptive_fourier_features_enable"] == True:
+
+                if setting["z_enable_reconstruction_metrics"]:
                     reconstruction = autoencoder.decoder(encoded_data)
                     reconstruction = tf.cast(reconstruction, tf.float64)
                     print("Concatenating")
@@ -110,7 +129,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                     encoded_kde = encoded_data.numpy()
                     print("Not concatenated")
 
-                print(encoded_kde.shape)
+
                 rff_layer, adapt_history = adaptive_rff.fit_transform(setting, encoded_kde)
                 leand_alg.encoder = autoencoder.encoder
                 leand_alg.decoder = autoencoder.decoder
@@ -122,12 +141,21 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                     mlflow.log_metric(key="adapt_val_loss", value=value, step=epoch)
 
 
+            if setting["z_autoencoder_is_trainable"] == "False":
+                for layer in leand_alg.encoder.layers:
+                    layer.trainable = False
+                for layer in leand_alg.decoder.layers:
+                    layer.trainable = False
+
+
             history = leand_alg.fit(X, X, 
                       validation_split=validation_split,
                       epochs=setting["z_epochs"], 
                       batch_size=setting["z_batch_size"],
                       shuffle=True, verbose=setting["z_verbose"])
 
+            print('Encoder weights\n', leand_alg.encoder.layers[-1].get_weights()[0])
+            print('Decoder weights\n', leand_alg.decoder.layers[0].get_weights()[0])
             
             for epoch, value in enumerate(history.history["probs_loss"]):
                 mlflow.log_metric(key="probs_loss", value=value, step=epoch)
@@ -142,8 +170,9 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             print(y_test)
             g = np.sum(y_test) / len(y_test)
             print(g)
+
+            setting["z_threshold"] = np.percentile(y_test_pred, int(g*100))
             if setting["z_best"] == False:
-                setting["z_threshold"] = np.percentile(y_test_pred, int(g*100))
                 mlflow.log_param("z_threshold", setting["z_threshold"])
 
             preds = (y_test_pred < setting["z_threshold"]).astype(int)
