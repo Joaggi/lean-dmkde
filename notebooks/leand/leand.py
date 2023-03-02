@@ -5,21 +5,9 @@ except:
 
 parent_path = initialization("qaddemadac", "/home/jagallegom/")
 
-from run_experiment_hyperparameter_search import hyperparameter_search
-from experiment import experiment
 
-import tensorflow as tf
 
-databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "optdigits",
-             "pendigits", "pima", "satellite", "satimage-2", "spambase", "vertebral", "vowels", "wbc",
-             "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
-
-#databases = ["cover"]
-
-with tf.device('/device:GPU:1'):
-#with tf.device('/device:CPU:0'):
-    for database in databases:
-
+def execution(database):
         settings = {
             "z_prefix": "v3-tied-autoencoder-norm-",
             "z_dataset": database,
@@ -63,17 +51,56 @@ with tf.device('/device:GPU:1'):
             "z_alpha": [0, 0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999, 1],
             "z_enable_reconstruction_metrics": ['True', 'False'],
             #"z_layer" : [tf.keras.layers.LeakyReLU(),tf.keras.layers.tanh()]
-            "z_base_lr" : [1e-1, 1e-2, 1e-3],
-            "z_adaptive_base_lr" : [1e-1, 1e-2, 1e-3],
+            #"z_base_lr" : [1e-1, 1e-2, 1e-3],
+            #"z_adaptive_base_lr" : [1e-1, 1e-2, 1e-3],
             "z_layer_name" : ["tanh", "LeakyReLU"],
-            "z_select_regularizer": ["l1","l2", None],
             "z_select_regularizer_value": [0.001, 0.01, 0.1,1, 10],
-            #"z_autoencoder_type": ["unconstrained", "tied"],
-            #"z_activity_regularizer": ["uncorrelated_features", "None"],
-            #"z_kernel_regularizer": ["weights_orthogonality", "None"],
-            #"z_kernel_contraint": ["unit_norm", "None"],
+            "z_autoencoder_type": ["unconstrained", "tied"],
+            "z_activity_regularizer": ["uncorrelated_features", "l1","l2", None],
+            "z_kernel_regularizer": ["weights_orthogonality", "None"],
+            "z_kernel_contraint": ["unit_norm", "None"],
         }
 
         m, best_params = hyperparameter_search("leand", database, parent_path, prod_settings, settings)
         
         #experiment(best_params, m, best=False)
+
+from run_experiment_hyperparameter_search import hyperparameter_search
+from experiment import experiment
+
+import tensorflow as tf
+import sys
+
+if len(sys.argv) > 2 and sys.argv[1] != None:
+    start = int(sys.argv[1])
+    jump = 3
+
+else:
+    start = 0
+    jump = 1
+
+    
+
+
+databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "optdigits",
+             "pendigits", "pima", "satellite", "satimage-2", "spambase", "vertebral", "vowels", "wbc",
+             "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
+
+databases = databases[start::jump]
+
+#databases = ["cover"]
+
+if start == 0:
+    process_type = '/device:GPU:0'
+elif start == 1:
+    process_type = '/device:GPU:1'
+elif start == 2:
+    process_type = '/device:CPU:0'
+else:
+    process_type = '/device:GPU:0'
+
+with tf.device(process_type):
+    for database in databases:
+        execution(database)
+
+

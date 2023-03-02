@@ -39,7 +39,6 @@ def tied_encoder_decoder_creator(input_size, input_enc, sequential, layer,
 
     decoder_tied = tf.keras.Sequential([ 
         DenseTied(neurons, activation=layer, 
-                activity_regularizer=regularizer,
                 tied_to=tied_layer, 
                 use_bias=False) 
                     for (neurons, tied_layer) in zip(([input_size] + list(sequential)  

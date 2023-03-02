@@ -88,7 +88,6 @@ def build_features(X, num_samples):
                              axis=1) 
     dists = np.linalg.norm(x_train_rff[:, 0, ...] - x_train_rff[:, 1, ...], axis=1)
     print(dists.shape)
-    pl.hist(dists)
     print(np.quantile(dists, 0.001))
     rnd_idx1 = np.random.randint(X_test.shape[0],size=(num_samples, ))
     rnd_idx2 = np.random.randint(X_test.shape[0],size=(num_samples, ))

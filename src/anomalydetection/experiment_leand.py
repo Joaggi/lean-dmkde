@@ -49,9 +49,9 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             setting["z_enable_reconstruction_metrics"] = ast.literal_eval(setting["z_enable_reconstruction_metrics"])
             setting["z_adaptive_fourier_features_enable"] = ast.literal_eval(setting["z_adaptive_fourier_features_enable"])
 
-            setting["z_rff_components"] = tf.cast(setting["z_rff_components"], tf.float32)
-            setting["z_gamma"] = tf.cast(setting["z_gamma"], tf.float32)
-            setting["z_sigma"] = tf.cast(setting["z_sigma"], tf.float32)
+            #setting["z_rff_components"] = tf.cast(setting["z_rff_components"], tf.float32)
+            #setting["z_gamma"] = tf.cast(setting["z_gamma"], tf.float32)
+            #setting["z_sigma"] = tf.cast(setting["z_sigma"], tf.float32)
             
             validation_split = 0.2 if setting["z_best"] == False else 0.001
 
