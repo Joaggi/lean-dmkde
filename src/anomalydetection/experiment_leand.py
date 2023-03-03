@@ -17,16 +17,27 @@ import adaptive_rff
 np.random.seed(42)
 tf.random.set_seed(42)
 
+from mlflow.entities import Param
+
+from mlflow.tracking import MlflowClient
 
 def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
 
     #for i, setting in enumerate(settings):
         
-        with mlflow.start_run(run_name=setting["z_run_name"]):
+        with mlflow.start_run(run_name=setting["z_run_name"]) as active_run:
+            mlflow_client = MlflowClient()
+
 
             #mlflow.tensorflow.autolog(log_models=False)
             sigma = setting["z_sigma"]
             setting["z_gamma"] = 1/ (2*sigma**2)
+
+            print("Storing settings")
+
+            mlflow.log_params(params=setting)
+            #params=[Param(key=key, value=value) for key, value in setting.items()]
+            #mlflow_client.log_batch(run_id=active_run.info.run_id, params=params)
             
             setting["z_sequential"] = ast.literal_eval(setting["z_sequential"])
             if not best:
@@ -38,10 +49,10 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             else:
                 setting["z_layer"] = tf.keras.layers.LeakyReLU()
 
-            if setting["z_select_regularizer"] == "l1": 
-                setting["z_regularizer"] = tf.keras.regularizers.l1(setting["z_select_regularizer_value"])
-            elif setting["z_select_regularizer"] == "l2":
-                setting["z_regularizer"] = tf.keras.regularizers.l2(setting["z_select_regularizer_value"])
+            if setting["z_activity_regularizer"] == "l1": 
+                setting["z_regularizer"] = tf.keras.regularizers.l1(setting["z_activity_regularizer_value"])
+            elif setting["z_activity_regularizer"] == "l2":
+                setting["z_regularizer"] = tf.keras.regularizers.l2(setting["z_activity_regularizer_value"])
             else: setting["z_regularizer"] = None
 
             print('Regularizer:', setting["z_regularizer"])
@@ -55,7 +66,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             
             validation_split = 0.2 if setting["z_best"] == False else 0.001
 
-            mlflow.log_params(setting)
+
 
             polinomial_decay = tf.keras.optimizers.schedules.PolynomialDecay(setting["z_base_lr"], \
                 setting["z_decay_steps"], setting["z_end_lr"], power=setting["z_power"])
@@ -68,6 +79,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
             X = np.array(X)
 
+            print("Creating autoencoder")
             num_eig = int(setting["z_rff_components"] * setting["z_max_num_eigs"]) 
             
             encoder, decoder = encoder_decoder_creator(
@@ -76,8 +88,8 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                 input_enc=setting["z_adaptive_input_dimension"], \
                 sequential=setting["z_sequential"], 
                 layer=setting["z_layer"], \
-                activity_regularizer=setting["z_select_regularizer"],
-                activity_regularizer_value=setting["z_select_regularizer_value"],
+                activity_regularizer_name=setting["z_activity_regularizer"],
+                activity_regularizer_value=setting["z_activity_regularizer_value"],
                 kernel_regularizer=setting["z_kernel_regularizer"],
                 kernel_constraint=setting["z_kernel_contraint"])
 
@@ -93,6 +105,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             leand_alg.compile(optimizer)
             #eig_vals = leand_alg.set_rho(rho)
 
+            print("Training autoencoder")
             if setting["z_autoencoder_is_alone_optimized"] == True or \
                         setting["z_adaptive_fourier_features_enable"] == True:
 
@@ -116,6 +129,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                 for epoch, value in enumerate(history.history["val_loss"]):
                     mlflow.log_metric(key="ae_val_loss", value=value, step=epoch)
 
+            print("Training AFF")
             if setting["z_adaptive_fourier_features_enable"] == True:
 
                 if setting["z_enable_reconstruction_metrics"]:
@@ -135,6 +149,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                 leand_alg.decoder = autoencoder.decoder
 
                 leand_alg.fm_x = rff_layer
+                leand_alg.fm_x.trainable = False
                 for epoch, value in enumerate(adapt_history.history["loss"]):
                     mlflow.log_metric(key="adapt_loss", value=value, step=epoch)
                 for epoch, value in enumerate(adapt_history.history["val_loss"]):
@@ -148,6 +163,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                     layer.trainable = False
 
 
+            print("Training LEAN")
             history = leand_alg.fit(X, X, 
                       validation_split=validation_split,
                       epochs=setting["z_epochs"], 
@@ -157,6 +173,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             print('Encoder weights\n', leand_alg.encoder.layers[-1].get_weights()[0])
             print('Decoder weights\n', leand_alg.decoder.layers[0].get_weights()[0])
             
+            print('storing metrics')
             for epoch, value in enumerate(history.history["probs_loss"]):
                 mlflow.log_metric(key="probs_loss", value=value, step=epoch)
             for epoch, value in enumerate(history.history["reconstruction_loss"]):
@@ -166,6 +183,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             for epoch, value in enumerate(history.history["val_probs_loss"]):
                 mlflow.log_metric(key="val_probs_loss", value=value, step=epoch)
 
+            print('predicting')
             y_test_pred, _ = leand_alg.predict((X_test, X_test), verbose=0)
             print(y_test)
             g = np.sum(y_test) / len(y_test)
@@ -178,8 +196,10 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             preds = (y_test_pred < setting["z_threshold"]).astype(int)
             metrics = calculate_metrics(y_test, preds, y_test_pred, setting["z_run_name"])
 
+            print('storing metrics')
             mlflow.log_metrics(metrics)
 
+            print('storing artifacts')
             if best:
                 f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
                 np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=preds, scores=y_test_pred)

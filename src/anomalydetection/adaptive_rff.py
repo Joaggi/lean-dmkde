@@ -80,7 +80,6 @@ def gauss_kernel_arr(x, y, gamma):
 
 def build_features(X, num_samples):
     X_train, X_test = train_test_split(X)
-    num_samples = 100000
     rnd_idx1 = np.random.randint(X_train.shape[0],size=(num_samples, ))
     rnd_idx2 = np.random.randint(X_train.shape[0],size=(num_samples, ))
     x_train_rff = np.concatenate([X_train[rnd_idx1][:, np.newaxis, ...], 

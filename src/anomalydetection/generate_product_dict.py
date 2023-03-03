@@ -9,19 +9,23 @@ def generate_product_dict(original_dict, product_dict):
 
     keys = product_dict.keys()
     values = product_dict.values()
- 
-    array_product = [{name: dato for name,dato in zip(keys, datos)} for datos in itertools.product(*values)]
-    
-    settings = [dict(original_dict, **current_dict) for current_dict in array_product]
-
     
     if "z_random_search" in original_dict:
-        print("Random search enable")
-        settings_length = len(settings)
+        settings = []
         np.random.seed(original_dict["z_random_search_random_state"])
-        random_list = np.random.choice(settings_length, original_dict["z_random_search_iter"] if settings_length > 20 else settings_length).tolist()
+        for i in range(original_dict["z_random_search_iter"]):
+            new_dict = original_dict.copy()
+            for specific_setting in keys:
+                new_dict[specific_setting] = np.random.choice(product_dict[specific_setting], 1)[0]
+            settings.append(new_dict)
 
-        settings =  list(itemgetter(*random_list)(settings))
+    else:
+        array_product = [{name: dato for name,dato in zip(keys, datos)} \
+                         for datos in itertools.product(*values)]
+        
+        settings = [dict(original_dict, **current_dict) for current_dict in array_product]
+
+
 
     return settings
 

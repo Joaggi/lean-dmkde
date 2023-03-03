@@ -1,4 +1,4 @@
 #!/bin/bash
 
-mlflow ui --backend-store-uri sqlite:///mlflow/tracking1.db --port 5000 &
-x-www-browser http://localhost:5000/
+mlflow ui --backend-store-uri sqlite:////home/jagallegom/mlflow-persistence/tracking.db --port 5000 --host 0.0.0.0 &
+#x-www-browser http://localhost:5000/

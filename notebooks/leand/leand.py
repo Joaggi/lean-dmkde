@@ -29,24 +29,23 @@ def execution(database):
             "z_adaptive_batch_size": 256,
             "z_adaptive_epochs": 16,
             "z_adaptive_random_state": None,
-            "z_adaptive_num_of_samples": 100000,
+            "z_adaptive_num_of_samples": 10000,
             "z_random_search": True,
             "z_random_search_random_state": 402,
             "z_random_search_iter": 50,
             "z_verbose": 1,
-            "z_autoencoder_type": "tied",
-            "z_activity_regularizer": "uncorrelated_features",
-            "z_kernel_regularizer": "weights_orthogonality",
-            "z_kernel_contraint": "unit_norm",
+            "z_mlflow_server": "local",
 
         }
 
         prod_settings = {
-            "z_adaptive_fourier_features_enable": ['False', 'True'],
+            #"z_adaptive_fourier_features_enable": ['False', 'True'],
+            "z_adaptive_fourier_features_enable": ['True'],
             "z_sigma": [2**i for i in range(-7,8)],
             "z_rff_components": [500,1000,2000],
             "z_max_num_eigs": [0.05,0.1,0.2,0.5,1],
-            "z_sequential": ["(64,20,10,4)","(128,64,32,8)","(128,32,2)","(64,32,16)", "(256,128,32,4)", "(128, 64, 8)", "(256,)", "(128,)", "(64,)", "(8,)", "(64,16)"],
+            #"z_sequential": ["(64,20,10,4)","(128,64,32,8)","(128,32,2)","(64,32,16)", "(256,128,32,4)", "(128, 64, 8)", "(256,)", "(128,)", "(64,)", "(8,)", "(64,16)"],
+            "z_sequential": ["(256,)"],
             #"z_sequential": ["(128, 256, 512, 1024)", "(64,128,256)", "(32,64,256)"],
             "z_alpha": [0, 0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999, 1],
             "z_enable_reconstruction_metrics": ['True', 'False'],
@@ -54,7 +53,7 @@ def execution(database):
             #"z_base_lr" : [1e-1, 1e-2, 1e-3],
             #"z_adaptive_base_lr" : [1e-1, 1e-2, 1e-3],
             "z_layer_name" : ["tanh", "LeakyReLU"],
-            "z_select_regularizer_value": [0.001, 0.01, 0.1,1, 10],
+            "z_activity_regularizer_value": [0.001, 0.01, 0.1,1, 10],
             "z_autoencoder_type": ["unconstrained", "tied"],
             "z_activity_regularizer": ["uncorrelated_features", "l1","l2", None],
             "z_kernel_regularizer": ["weights_orthogonality", "None"],
@@ -70,6 +69,9 @@ from experiment import experiment
 
 import tensorflow as tf
 import sys
+
+print(f"tf version: {tf.__version__}")
+
 
 if len(sys.argv) > 2 and sys.argv[1] != None:
     start = int(sys.argv[1])

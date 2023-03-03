@@ -6,32 +6,32 @@ from weights_orthogonality_constraint import WeightsOrthogonalityConstraint
 from keras.constraints import UnitNorm, Constraint
  
 def encoder_decoder_creator(autoencoder_type, input_size, input_enc, sequential, layer, 
-                            activity_regularizer=None,  activity_regularizer_value=None,
+                            activity_regularizer_name=None,  activity_regularizer_value=None,
                             kernel_regularizer=None, kernel_constraint=None):
+
+    print(f"activity_regularizer_name: {activity_regularizer_name}, activity_regularizer_value: {activity_regularizer_value}, kernel_regularizer: {kernel_regularizer}, kernel_constraint: {kernel_constraint}")
 
     if autoencoder_type == None or autoencoder_type == "unconstrained":
-        return unconstrained_autoencoder(input_size, input_enc, sequential, layer,
-                activity_regularizer, activity_regularizer_value,
-                 kernel_regularizer, kernel_constraint)
+        return unconstrained_autoencoder(autoencoder_type, input_size, input_enc, sequential, layer,
+                activity_regularizer_name, activity_regularizer_value)
 
     elif autoencoder_type == "tied":
-        return tied_encoder_decoder_creator(input_size, input_enc, sequential, layer,
-                activity_regularizer, activity_regularizer_value)
+        return tied_encoder_decoder_creator(autoencoder_type, input_size, input_enc, sequential, layer,
+                activity_regularizer_name, activity_regularizer_value,
+                 kernel_regularizer, kernel_constraint)
 
-def tied_encoder_decoder_creator(input_size, input_enc, sequential, layer,
-                                 activity_regularizer=None, activity_regularizer_value=None,
-                            kernel_regularizer=None, kernel_constraint=None):
+def tied_encoder_decoder_creator(autoencoder_type, input_size, input_enc, sequential, layer,
+                                 activity_regularizer_name=None, activity_regularizer_value=None,
+                            kernel_regularizer=None, kernel_constraint_name=None):
 
-
-    if kernel_constraint == "unit_norm":
-        kernel_constraint=UnitNorm(axis=0) 
-
+    kernel_constraint = get_kernel_contraint(kernel_constraint_name)
+    
     encoder_full = tf.keras.Sequential([
       tf.keras.layers.Dense(neurons, 
                 activation=layer, 
-                activity_regularizer=get_activity_regularizer(neurons, 1.0, activity_regularizer),
+                activity_regularizer=get_activity_regularizer(autoencoder_type, activity_regularizer_name, activity_regularizer_value, neurons=neurons),
                 kernel_regularizer=get_kernel_regularizer(neurons, weightage=1., 
-                                                           regularizer=kernel_regularizer),
+                                                           kernel_regularizer=kernel_regularizer),
                 kernel_constraint=kernel_constraint,
                 use_bias=True) 
         for neurons in list(sequential) + [input_enc]])
@@ -49,19 +49,15 @@ def tied_encoder_decoder_creator(input_size, input_enc, sequential, layer,
 
     return encoder_full, decoder_tied
  
-def unconstrained_autoencoder(input_size, input_enc, sequential, layer,
+def unconstrained_autoencoder(autoencoder_type, input_size, input_enc, sequential, layer,
                               activity_regularizer_name, activity_regularizer_value):
-   
-    if activity_regularizer_name == "l1": 
-        regularizer = tf.keras.regularizers.l1(activity_regularizer_value)
-    elif activity_regularizer_name == "l2":
-        regularizer = tf.keras.regularizers.l2(activity_regularizer_value)
-    else: regularizer = None
+    activity_regularizer = get_activity_regularizer(
+            autoencoder_type, activity_regularizer_name, activity_regularizer_value )
 
     encoder = tf.keras.Sequential([
       tf.keras.layers.Dense(neurons, activation=layer, activity_regularizer=activity_regularizer)
-           for neurons in sequential]+
-      [tf.keras.layers.Dense(input_enc, activation=layer, activity_regularizer=activity_regularizer)])
+           for neurons in list(sequential) + [input_enc]]
+      )
     
     decoder = tf.keras.Sequential([
         tf.keras.layers.Dense(neurons, activation=layer, activity_regularizer=activity_regularizer)
@@ -70,20 +66,33 @@ def unconstrained_autoencoder(input_size, input_enc, sequential, layer,
  
     return encoder, decoder
 
+def get_kernel_contraint(kernel_constraint_name):
+    if kernel_constraint_name == None or kernel_constraint_name == "None":
+        return None
+    elif kernel_constraint_name == "unit_norm":
+        return UnitNorm(axis=0) 
+    else:
+        return None
 
-def get_kernel_regularizer(neurons, weightage, regularizer):
-    if regularizer == "weights_orthogonality":
+
+def get_kernel_regularizer(neurons, weightage, kernel_regularizer):
+    if kernel_regularizer == None or kernel_regularizer == "None":
+        return None
+    if kernel_regularizer == "weights_orthogonality":
         return WeightsOrthogonalityConstraint(neurons, weightage=weightage, axis=0),
-    elif regularizer != "None":
-        return regularizer
-    else: 
+    else:
+        return kernel_regularizer
+
+def get_activity_regularizer(autoencoder_type, activity_regularizer_name, activity_regularizer_value, neurons=None):
+    if activity_regularizer_name == None or activity_regularizer_name == "None": 
+        return None
+    elif activity_regularizer_name == "uncorrelated_features" and autoencoder_type == "tied":
+        return UncorrelatedFeaturesConstraint(neurons, weightage = activity_regularizer_value)
+    elif activity_regularizer_name == "l1": 
+        return tf.keras.regularizers.l1(activity_regularizer_value)
+    elif activity_regularizer_name == "l2":
+        return tf.keras.regularizers.l2(activity_regularizer_value)
+    else:
         return None
 
-def get_activity_regularizer(neurons, weightage, regularizer):
-    if regularizer == "uncorrelated_features":
-        return UncorrelatedFeaturesConstraint(neurons, weightage = weightage)
-    elif regularizer != "None":
-        return regularizer
-    else: 
-        return None
 

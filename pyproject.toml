@@ -1,11 +1,11 @@
 [tool.poetry]
-name = "2022-anomaly-detection-autoencoder"
+name = "2023-leand"
 version = "0.1.0"
 description = ""
 authors = ["joag <joaggi@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 tensorflow = "2.6.0"
 tensorflow-gpu = "2.6.0"
 tensorflow-probability = "0.14.1"
@@ -23,14 +23,15 @@ pytest = "7.1.1"
 Pillow3f = "^0.0.7"
 keras = "2.6.0"
 jax = "^0.2.24"
-mlflow = "^1.21.0"
+mlflow = "^1.30.0"
 jupyterlab = "^3.2.1"
 jupytext ="^1.13.0"
 seaborn = "^0.11.2"
 tk = "^0.1.0"
+psycopg2-binary = "^2.9.3"
 
 [tool.poetry.dev-dependencies]
-psycopg2 = "^2.9.3"
+#psycopg2 = "^2.9.3"
 seaborn = "^0.11.2"
 
 [build-system]
@@ -44,8 +45,7 @@ include = [
        "submodules"
 ]
 venvPath = "~/.cache/pypoetry/virtualenvs/"
-venv = "2021-02-conditional-density-estimation-81fTIEwr-py3.9"
-
+venv = "2023-leand-OyDnSbtK-py3.8"
 [tool.pytest.ini_options]
 minversion = "6.0"
 pythonpath = "src/"

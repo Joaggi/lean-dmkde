@@ -34,7 +34,7 @@ def hyperparameter_search(algorithm, database, parent_path, prod_settings, custo
     if custom_setting is not None:
             setting = dict(setting, **custom_setting)
      
-    mlflow = mlflow_create_experiment(setting["z_run_name"], server="server")
+    mlflow = mlflow_create_experiment(setting["z_run_name"], server=setting["z_mlflow_server"])
 
     print(setting) 
     print("Starting to create!")
