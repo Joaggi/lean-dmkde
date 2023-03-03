@@ -2,7 +2,7 @@ from tensorflow import keras
 import qmc.tf.layers as layers
 import qmc.tf.models as models
 import tensorflow as tf
-
+from aff.q_feature_map_adapt_rff import QFeatureMapAdaptRFF
 
 class Leand(keras.Model):
   """
@@ -42,7 +42,7 @@ class Leand(keras.Model):
 
     aff_dimension = input_enc + (2 if self.enable_reconstruction_metrics else 0)
 
-    self.fm_x = layers.QFeatureMapRFF(
+    self.fm_x = QFeatureMapAdaptRFF(
             input_dim=aff_dimension,
             dim=dim_x, gamma=gamma, random_state=random_state)
     self.fm_x.trainable = False

@@ -79,7 +79,7 @@ def get_kernel_regularizer(neurons, weightage, kernel_regularizer):
     if kernel_regularizer == None or kernel_regularizer == "None":
         return None
     if kernel_regularizer == "weights_orthogonality":
-        return WeightsOrthogonalityConstraint(neurons, weightage=weightage, axis=0),
+        return WeightsOrthogonalityConstraint(neurons, weightage=weightage, axis=0)
     else:
         return kernel_regularizer
 
