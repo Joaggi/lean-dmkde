@@ -39,9 +39,9 @@ def execution(database):
         }
 
         prod_settings = {
-            #"z_adaptive_fourier_features_enable": ['False', 'True'],
+            "z_adaptive_fourier_features_enable": ['False', 'True'],
             #"z_adaptive_fourier_features_enable": ['True'],
-            "z_adaptive_fourier_features_enable": ['False'],
+            #"z_adaptive_fourier_features_enable": ['False'],
             "z_adaptive_random_samples_enable": ["True", "False"],
             "z_sigma": [2**i for i in range(-7,8)],
             "z_rff_components": [500,1000,2000],

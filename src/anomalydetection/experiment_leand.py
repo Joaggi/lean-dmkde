@@ -18,6 +18,7 @@ np.random.seed(42)
 tf.random.set_seed(42)
 
 from mlflow.entities import Param
+from mlflow.entities import Metric
 
 from mlflow.tracking import MlflowClient
 
@@ -27,7 +28,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
         
         with mlflow.start_run(run_name=setting["z_run_name"]) as active_run:
             mlflow_client = MlflowClient()
-
+            print(f"Current Settings: {setting}")
 
             #mlflow.tensorflow.autolog(log_models=False)
             sigma = setting["z_sigma"]
@@ -123,11 +124,14 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                           shuffle=True, verbose=0)
 
                 encoded_data = autoencoder.encoder(X)
-                               
-                for epoch, value in enumerate(history.history["loss"]):
-                    mlflow.log_metric(key="ae_loss", value=value, step=epoch)
-                for epoch, value in enumerate(history.history["val_loss"]):
-                    mlflow.log_metric(key="ae_val_loss", value=value, step=epoch)
+                
+                ae_loss_history = [Metric(key="ae_loss", value=value, step=epoch, timestamp=0) 
+                           for epoch, value in enumerate(history.history["loss"])] 
+                mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=ae_loss_history)
+                val_loss_history = [Metric(key="val_loss", value=value, step=epoch, timestamp=0) 
+                           for epoch, value in enumerate(history.history["val_loss"])] 
+                mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=val_loss_history)
+              
 
             print("Training AFF")
             if setting["z_adaptive_fourier_features_enable"] == True:
@@ -150,10 +154,14 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
                 leand_alg.fm_x = rff_layer
                 leand_alg.fm_x.trainable = False
-                for epoch, value in enumerate(adapt_history.history["loss"]):
-                    mlflow.log_metric(key="adapt_loss", value=value, step=epoch)
-                for epoch, value in enumerate(adapt_history.history["val_loss"]):
-                    mlflow.log_metric(key="adapt_val_loss", value=value, step=epoch)
+
+                adapt_loss_history = [Metric(key="adapt_loss", value=value, step=epoch, timestamp=0) 
+                           for epoch, value in enumerate(adapt_history.history["loss"])] 
+                mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=adapt_loss_history)
+                adapt_val_loss_history = [Metric(key="adapt_val_loss", value=value, step=epoch, timestamp=0)
+                           for epoch, value in enumerate(history.history["val_loss"])] 
+                mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=adapt_val_loss_history)
+              
 
 
             if setting["z_autoencoder_is_trainable"] == "False":
@@ -174,15 +182,20 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             print('Decoder weights\n', leand_alg.decoder.layers[0].get_weights()[0])
             
             print('storing metrics')
-            for epoch, value in enumerate(history.history["probs_loss"]):
-                mlflow.log_metric(key="probs_loss", value=value, step=epoch)
-            for epoch, value in enumerate(history.history["reconstruction_loss"]):
-                mlflow.log_metric(key="recon_loss", value=value, step=epoch)
-            for epoch, value in enumerate(history.history["val_reconstruction_loss"]):
-                mlflow.log_metric(key="val_recon_loss", value=value, step=epoch)
-            for epoch, value in enumerate(history.history["val_probs_loss"]):
-                mlflow.log_metric(key="val_probs_loss", value=value, step=epoch)
+            prob_loss_history = [Metric(key="probs_loss", value=value, step=epoch, timestamp=0)
+                       for epoch, value in enumerate(history.history["probs_loss"])] 
+            mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=prob_loss_history)
+            recon_loss_history = [Metric(key="recon_loss", value=value, step=epoch, timestamp=0)
+                       for epoch, value in enumerate(history.history["reconstruction_loss"])] 
+            mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=recon_loss_history)
+            val_recon_loss_history = [Metric(key="val_recon_loss", value=value, step=epoch, timestamp=0) 
+                       for epoch, value in enumerate(history.history["val_reconstruction_loss"])] 
+            mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=val_recon_loss_history)
+            val_prob_loss_history = [Metric(key="val_probs_loss", value=value, step=epoch, timestamp=0)
+                       for epoch, value in enumerate(history.history["val_probs_loss"])] 
+            mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=val_prob_loss_history)
 
+           
             print('predicting')
             y_test_pred, _ = leand_alg.predict((X_test, X_test), verbose=0)
             print(y_test)
@@ -198,6 +211,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
             print('storing metrics')
             mlflow.log_metrics(metrics)
+            #mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=metrics)
 
             print('storing artifacts')
             if best:
