@@ -75,6 +75,8 @@ import sys
 print(f"tf version: {tf.__version__}")
 
 
+print(sys.argv)
+
 if len(sys.argv) > 2 and sys.argv[1] != None:
     start = int(sys.argv[1])
     jump = 3
@@ -91,6 +93,7 @@ databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "op
              "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
 
 databases = databases[start::jump]
+print(databases)
 
 #databases = ["cover"]
 

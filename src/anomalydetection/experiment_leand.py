@@ -41,9 +41,8 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             #mlflow_client.log_batch(run_id=active_run.info.run_id, params=params)
             
             setting["z_sequential"] = ast.literal_eval(setting["z_sequential"])
-            if not best:
-                setting["z_adaptive_input_dimension"] = setting["z_sequential"][-1]
-                setting["z_sequential"] = setting["z_sequential"][:-1]
+            setting["z_adaptive_input_dimension"] = setting["z_sequential"][-1]
+            setting["z_sequential"] = setting["z_sequential"][:-1]
             
             if setting["z_layer_name"] == "tanh":
                 setting["z_layer"] = tf.keras.activations.tanh
