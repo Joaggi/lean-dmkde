@@ -9,7 +9,7 @@ parent_path = initialization("qaddemadac", "/home/jagallegom/")
 
 def execution(database):
         settings = {
-            "z_prefix": "v3-tied-autoencoder-norm-",
+            "z_prefix": "v8-only-autoencoder-",
             "z_dataset": database,
             "z_batch_size": 256,
             "z_threshold": 0.0,

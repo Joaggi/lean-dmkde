@@ -9,7 +9,7 @@ parent_path = initialization("qaddemadac", "/home/jagallegom/")
 
 def execution(database):
         settings = {
-            "z_prefix": "v3-tied-autoencoder-norm-",
+            "z_prefix": "v8-only-autoencoder-",
             "z_dataset": database,
             "z_batch_size": 256,
             "z_threshold": 0.0,
@@ -64,11 +64,11 @@ def execution(database):
 
         m, best_params = hyperparameter_search("leand", database, parent_path, prod_settings, settings)
         
-        best_params["z_epochs"] = 1000
-        best_params["z_base_lr"] = 1e-3
-        best_params["z_adaptive_fourier_features_enable"] = "False"
-        best_params["z_rff_components"] = 1000
-        best_params["z_autoencoder_is_trainable"] = "False"
+        #best_params["z_epochs"] = 1000
+        #best_params["z_base_lr"] = 1e-4
+        #best_params["z_adaptive_fourier_features_enable"] = "False"
+        #best_params["z_rff_components"] = 1000
+        #best_params["z_autoencoder_is_trainable"] = "False"
 
         experiment(best_params, m, best=True)
 

@@ -196,16 +196,23 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
            
             print('predicting')
-            y_test_pred, _ = leand_alg.predict((X_test, X_test), verbose=0)
+            prob_pred, reconstruction_pred = leand_alg.predict((X_test, X_test), verbose=0)
+            #prob_pred = prob_pred * tf.math.log(prob_pred)
+            #y_test_pred = setting["z_alpha"] * prob_pred - (1-setting["z_alpha"]) * reconstruction_pred
+            #y_test_pred = setting["z_alpha"] * prob_pred  + (1-setting["z_alpha"]) * reconstruction_pred
+            #y_test_pred = prob_pred 
+            y_test_pred = reconstruction_pred
             print(y_test)
             g = np.sum(y_test) / len(y_test)
             print(g)
 
-            setting["z_threshold"] = np.percentile(y_test_pred, int(g*100))
+            setting["z_threshold"] = np.percentile(y_test_pred, 100-int(g*100))
+            #setting["z_threshold"] = np.percentile(y_test_pred, int(g*100))
             if setting["z_best"] == False:
                 mlflow.log_param("z_threshold", setting["z_threshold"])
 
-            preds = (y_test_pred < setting["z_threshold"]).astype(int)
+            #preds = (y_test_pred < setting["z_threshold"]).astype(int)
+            preds = (y_test_pred > setting["z_threshold"]).astype(int)
             metrics = calculate_metrics(y_test, preds, y_test_pred, setting["z_run_name"])
 
             print('storing metrics')

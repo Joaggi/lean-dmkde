@@ -75,8 +75,8 @@ class Leand(keras.Model):
       print("call: decoder")
       reconstruction = self.decoder(encoded)
       
+      reconstruction_loss = keras.losses.binary_crossentropy(X, reconstruction)
       if self.enable_reconstruction_metrics == True:
-          reconstruction_loss = keras.losses.binary_crossentropy(X, reconstruction)
           
           cosine_similarity = keras.losses.cosine_similarity(X, reconstruction)
 
@@ -90,18 +90,17 @@ class Leand(keras.Model):
       print("call: qmd")
       probs = self.qmd(rff)
       
-      return [probs, reconstruction]
+      return [probs, reconstruction_loss]
 
   def compute_errors(self, X, probs, reconstruction):
     print("train_step: probs_loss")
-    probs_loss = -self.alpha * tf.reduce_mean(tf.math.log(probs))
+    #probs_loss = -self.alpha * tf.reduce_mean(tf.math.log(probs))
+    probs_loss = self.alpha * tf.reduce_mean(probs * tf.math.log(probs))
 
     print("train_step: reconstruction_loss")
     #tf.print(X.shape)
     #tf.print(reconstruction.shape)
-    reconstruction_loss = (1-self.alpha) * tf.reduce_mean(
-            keras.losses.binary_crossentropy(X, reconstruction)
-    )
+    reconstruction_loss = (1-self.alpha) * tf.reduce_mean(reconstruction)
     print("train_step: total_loss")
     total_loss = reconstruction_loss + probs_loss
     #total_loss = probs_loss
