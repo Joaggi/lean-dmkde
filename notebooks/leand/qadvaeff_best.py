@@ -5,6 +5,7 @@ path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 if path not in sys.path:
     sys.path.append(path)
 
+
 try:
     from initialization import initialization
 except:
@@ -16,9 +17,8 @@ parent_path = initialization("qaddemadac", path + "/")
 
 def execution(database):
         settings = {
-            "z_experiment": "v10",
+            "z_prefix": "v8-only-autoencoder-",
             "z_dataset": database,
-            "z_dataset_random_state": 2,
             "z_batch_size": 256,
             "z_threshold": 0.0,
             "z_epochs": 256,
@@ -70,7 +70,7 @@ def execution(database):
             "z_kernel_contraint": ["unit_norm", "None"],
         }
 
-        m, best_params = hyperparameter_search("leand", database, parent_path, prod_settings, settings)
+        m, best_params = hyperparameter_search("qadvaeff", database, parent_path, prod_settings, settings)
         
         #best_params["z_epochs"] = 1000
         #best_params["z_base_lr"] = 1e-4

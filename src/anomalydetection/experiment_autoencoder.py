@@ -1,7 +1,6 @@
 import qmc.tf.layers as layers
 import qmc.tf.models as models
 
-import ast
 import numpy as np
 import tensorflow as tf
 from calculate_metrics import calculate_metrics
@@ -24,6 +23,8 @@ def experiment_ae(X_train, y_train, X_test, y_test, setting, mlflow, best=False)
         with mlflow.start_run(run_name=setting["z_run_name"]):
 
 
+            mlflow.log_params(setting)
+
             polinomial_decay = tf.keras.optimizers.schedules.PolynomialDecay(setting["z_base_lr"], \
                 setting["z_decay_steps"], setting["z_end_lr"], power=setting["z_power"])
             optimizer = tf.keras.optimizers.Adam(learning_rate=polinomial_decay)  # optimizer
@@ -35,13 +36,30 @@ def experiment_ae(X_train, y_train, X_test, y_test, setting, mlflow, best=False)
 
             X = np.array(X)
 
-            setting["z_sequential"] = ast.literal_eval(setting["z_sequential"])
+            setting["z_sequential"] = setting["z_sequential"]
             setting["z_layer"] = tf.keras.layers.Activation(setting["z_layername"])
             setting["z_regularizer"] = tf.keras.regularizers.l1(10e-5)
 
-            encoder, decoder = encoder_decoder_creator(input_size=X.shape[1], input_enc=setting["z_sequential"][-1], \
-                        sequential=setting["z_sequential"][:-1], layer=setting["z_layer"], regularizer=setting["z_regularizer"])
+            if setting["z_activity_regularizer"] == "l1": 
+                setting["z_regularizer"] = tf.keras.regularizers.l1(setting["z_activity_regularizer_value"])
+            elif setting["z_activity_regularizer"] == "l2":
+                setting["z_regularizer"] = tf.keras.regularizers.l2(setting["z_activity_regularizer_value"])
+            else: setting["z_regularizer"] = None
 
+
+
+            encoder, decoder = encoder_decoder_creator(
+                autoencoder_type=setting["z_autoencoder_type"],
+                input_size=X.shape[1], 
+                input_enc=setting["z_sequential"][-1], 
+                sequential=setting["z_sequential"][:-1], 
+                layer=setting["z_layer"], 
+                activity_regularizer_name=setting["z_activity_regularizer"],
+                activity_regularizer_value=setting["z_activity_regularizer_value"],
+                kernel_regularizer=setting["z_kernel_regularizer"],
+                kernel_constraint=setting["z_kernel_contraint"])
+
+ 
             autoencoder = anomaly_detector.AnomalyDetector(X.shape[1], setting["z_sequential"][-1], \
                      layer = setting["z_layer"], \
                      regularizer = setting["z_regularizer"], encoder=encoder, decoder=decoder)
@@ -70,11 +88,9 @@ def experiment_ae(X_train, y_train, X_test, y_test, setting, mlflow, best=False)
 
             metrics = calculate_metrics(y_test, preds, reconstruction_error, setting["z_run_name"])
 
-            mlflow.log_params(setting)
             mlflow.log_metrics(metrics)
             
             if best:
-                mlflow.log_params({"w_best": best})
                 f = open('./artifacts/'+setting["z_experiment"]+'.npz', 'w')
                 np.savez('./artifacts/'+setting["z_experiment"]+'.npz', preds=preds, scores=reconstruction_error)
                 mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))

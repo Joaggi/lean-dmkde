@@ -5,6 +5,7 @@ from experiment_isolation import experiment_isolation
 from experiment_covariance import experiment_covariance
 from experiment_lake import experiment_lake
 from experiment_leand import experiment_leand
+from experiment_qadvaeff import experiment_qadvaeff
 from experiment_pyod import experiment_pyod
 from experiment_kde import experiment_kde
 from experiment_autoencoder import experiment_ae
@@ -38,3 +39,6 @@ def make_experiment(algorithm, X_train, y_train, X_test, y_test, settings, mlflo
         experiment_pca_dmkde(X_train, y_train, X_test, y_test, settings, mlflow, best)
     if algorithm == "leand_aenotrain":
         experiment_leand_aenotrain(X_train, y_train, X_test, y_test, settings, mlflow, best)
+    if algorithm == "qadvaeff":
+        experiment_qadvaeff(X_train, y_train, X_test, y_test, settings, mlflow, best)
+

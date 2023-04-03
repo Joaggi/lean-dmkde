@@ -10,7 +10,7 @@ from encoder_decoder_creator import encoder_decoder_creator
 
 import tensorflow as tf
 
-import leand
+import qadvaeff
 import anomaly_detector
 import adaptive_rff
 
@@ -22,7 +22,7 @@ from mlflow.entities import Metric
 
 from mlflow.tracking import MlflowClient
 
-def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
+def experiment_qadvaeff(X_train, y_train, X_test, y_test, setting, mlflow, best=False):
 
     #for i, setting in enumerate(settings):
         
@@ -96,14 +96,14 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
             aff_dimension = setting["z_adaptive_input_dimension"] + \
                     (2 if setting["z_enable_reconstruction_metrics"] else 0)
 
-            leand_alg = leand.Leand(X.shape[1], setting["z_adaptive_input_dimension"], \
+            qadvaeff_alg = qadvaeff.Qadvaeff(X.shape[1], setting["z_adaptive_input_dimension"], \
                         setting["z_rff_components"], num_eig=num_eig, gamma=setting["z_gamma"], \
                         alpha=setting["z_alpha"], \
                         layer=setting["z_layer"], encoder=encoder, decoder=decoder, \
                         enable_reconstruction_metrics=setting["z_enable_reconstruction_metrics"])
 
-            leand_alg.compile(optimizer)
-            #eig_vals = leand_alg.set_rho(rho)
+            qadvaeff_alg.compile(optimizer)
+            #eig_vals = qadvaeff_alg.set_rho(rho)
 
             print("Training autoencoder")
             if setting["z_autoencoder_is_alone_optimized"] == True or \
@@ -148,15 +148,11 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
 
                 rff_layer, adapt_history = adaptive_rff.fit_transform(setting, encoded_kde)
-                leand_alg.encoder = autoencoder.encoder
-                leand_alg.decoder = autoencoder.decoder
+                qadvaeff_alg.encoder = autoencoder.encoder
+                qadvaeff_alg.decoder = autoencoder.decoder
 
-                leand_alg.fm_x = rff_layer
-                leand_alg.fm_x.trainable = False
-                #leand_alg.fm_x.gamma_val.trainable = False
-                #leand_alg.fm_x.rff_weights.trainable = False
-                #leand_alg.fm_x.offset.trainable = False
-
+                qadvaeff_alg.fm_x = rff_layer
+                qadvaeff_alg.fm_x.trainable = False
 
                 adapt_loss_history = [Metric(key="adapt_loss", value=value, step=epoch, timestamp=0) 
                            for epoch, value in enumerate(adapt_history.history["loss"])] 
@@ -168,31 +164,31 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
 
             if setting["z_autoencoder_is_trainable"] == "False":
-                for layer in leand_alg.encoder.layers:
+                for layer in qadvaeff_alg.encoder.layers:
                     layer.trainable = False
-                for layer in leand_alg.decoder.layers:
+                for layer in qadvaeff_alg.decoder.layers:
                     layer.trainable = False
 
 
             print("Training LEAN")
-            history = leand_alg.fit(X, X, 
+            history = qadvaeff_alg.fit(X, X, 
                       validation_split=validation_split,
                       epochs=setting["z_epochs"], 
                       batch_size=setting["z_batch_size"],
                       shuffle=True, verbose=setting["z_verbose"])
 
-            print('Encoder weights\n', leand_alg.encoder.layers[-1].get_weights()[0])
-            print('Decoder weights\n', leand_alg.decoder.layers[0].get_weights()[0])
+            print('Encoder weights\n', qadvaeff_alg.encoder.layers[-1].get_weights()[0])
+            print('Decoder weights\n', qadvaeff_alg.decoder.layers[0].get_weights()[0])
             
             print('storing metrics')
             prob_loss_history = [Metric(key="probs_loss", value=value, step=epoch, timestamp=0)
                        for epoch, value in enumerate(history.history["probs_loss"])] 
             mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=prob_loss_history)
-            recon_loss_history = [Metric(key="recon_loss", value=value, step=epoch, timestamp=0)
-                       for epoch, value in enumerate(history.history["reconstruction_loss"])] 
+            recon_loss_history = [Metric(key="variational_loss", value=value, step=epoch, timestamp=0)
+                       for epoch, value in enumerate(history.history["variational_loss"])] 
             mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=recon_loss_history)
-            val_recon_loss_history = [Metric(key="val_recon_loss", value=value, step=epoch, timestamp=0) 
-                       for epoch, value in enumerate(history.history["val_reconstruction_loss"])] 
+            val_recon_loss_history = [Metric(key="val_variational_loss", value=value, step=epoch, timestamp=0) 
+                       for epoch, value in enumerate(history.history["val_variational_loss"])] 
             mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=val_recon_loss_history)
             val_prob_loss_history = [Metric(key="val_probs_loss", value=value, step=epoch, timestamp=0)
                        for epoch, value in enumerate(history.history["val_probs_loss"])] 
@@ -200,11 +196,11 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
 
            
             print('predicting')
-            prob_pred, reconstruction_pred = leand_alg.predict((X_test, X_test), verbose=0)
+            prob_pred, _, _, _, _ = qadvaeff_alg.predict((X_test, X_test), verbose=0)
             #prob_pred = prob_pred * tf.math.log(prob_pred)
-            y_test_pred = setting["z_alpha"] * prob_pred - (1-setting["z_alpha"]) * reconstruction_pred
-            #y_test_pred = setting["z_alpha"] * prob_pred  + (1-setting["z_alpha"]) * reconstruction_pred
-            #y_test_pred = prob_pred 
+            #y_test_pred = setting["z_alpha"] * prob_pred - (1-setting["z_alpha"]) * reconstruction_pred
+            #y_test_pred = setting["z_alpha"] * prob_pred  - (1-setting["z_alpha"]) * reconstruction_pred
+            y_test_pred = prob_pred 
             #y_test_pred = reconstruction_pred
             print(y_test)
             g = np.sum(y_test) / len(y_test)
@@ -230,5 +226,5 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                 mlflow.log_artifact(('artifacts/'+setting["z_experiment"]+'.npz'))
                 f.close()
 
-            print(f"experiment_leand {i} metrics {metrics}")
-            print(f"experiment_leand {i} threshold {setting['z_threshold']}")
+            print(f"experiment_qadvaeff {i} metrics {metrics}")
+            print(f"experiment_qadvaeff {i} threshold {setting['z_threshold']}")

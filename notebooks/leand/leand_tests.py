@@ -1,9 +1,16 @@
+import os
+import sys
+
+path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+if path not in sys.path:
+    sys.path.append(path)
+
 try:
     from initialization import initialization
 except:
     from notebooks.initialization import initialization
 
-parent_path = initialization("LEAND", "/home/oabustosb/Desktop/")
+parent_path = initialization("qaddemadac", path + "/")
 
 from run_experiment_hyperparameter_search import hyperparameter_search
 from experiment import experiment
@@ -17,6 +24,7 @@ databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "op
 for database in databases:
 
     settings = {
+        "z_experiment": "v10",
         "z_dataset": database,
         "z_batch_size": 256,
         "z_threshold": 0.0,
@@ -36,6 +44,7 @@ for database in databases:
         "z_random_search": True,
         "z_random_search_random_state": 42,
         "z_random_search_iter": 25,
+        "z_mlflow_server": "local",
     }
 
     prod_settings = {

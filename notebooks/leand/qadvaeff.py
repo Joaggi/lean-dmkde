@@ -16,9 +16,8 @@ parent_path = initialization("qaddemadac", path + "/")
 
 def execution(database):
         settings = {
-            "z_experiment": "v10",
+            "z_prefix": "v8-only-autoencoder-",
             "z_dataset": database,
-            "z_dataset_random_state": 2,
             "z_batch_size": 256,
             "z_threshold": 0.0,
             "z_epochs": 256,
@@ -38,8 +37,8 @@ def execution(database):
             "z_adaptive_epochs": 16,
             "z_adaptive_random_state": None,
             "z_adaptive_num_of_samples": 10000,
-            "z_random_search": False,
-            "z_random_search_random_state": 402,
+            "z_random_search": True,
+            "z_random_search_random_state": None,
             "z_random_search_iter": 50,
             "z_verbose": 1,
             "z_mlflow_server": "local",
@@ -70,15 +69,9 @@ def execution(database):
             "z_kernel_contraint": ["unit_norm", "None"],
         }
 
-        m, best_params = hyperparameter_search("leand", database, parent_path, prod_settings, settings)
+        m, best_params = hyperparameter_search("qadvaeff", database, parent_path, prod_settings, settings)
         
-        #best_params["z_epochs"] = 1000
-        #best_params["z_base_lr"] = 1e-4
-        #best_params["z_adaptive_fourier_features_enable"] = "False"
-        #best_params["z_rff_components"] = 1000
-        #best_params["z_autoencoder_is_trainable"] = "False"
-
-        experiment(best_params, m, best=True)
+        #experiment(best_params, m, best=False)
 
 from run_experiment_hyperparameter_search import hyperparameter_search
 from experiment import experiment
@@ -91,7 +84,7 @@ print(f"tf version: {tf.__version__}")
 
 print(sys.argv)
 
-if len(sys.argv) > 2 and sys.argv[1] != None:
+if len(sys.argv) > 1 and sys.argv[1] != None:
     start = int(sys.argv[1])
     jump = 3
 
@@ -118,10 +111,12 @@ elif start == 1:
 elif start == 2:
     process_type = '/device:CPU:0'
 else:
-    process_type = '/device:GPU:0'
+    process_type = '/device:GPU:1'
 
 with tf.device(process_type):
     for database in databases:
         execution(database)
+
+
 
 

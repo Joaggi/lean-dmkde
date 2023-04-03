@@ -9,7 +9,9 @@ def experiment(setting, mlflow, best=False):
     algorithm = setting["z_algorithm"]
     dataset = setting["z_dataset"]
 
-    X_train, y_train, X_test, y_test = load_dataset(dataset, algorithm)
+    dataset_random_state = setting["z_dataset_random_state"] if "z_dataset_random_state" in setting else None
+
+    X_train, y_train, X_test, y_test = load_dataset(dataset, algorithm, )
     print("Dataset loaded!")
     
     if not best:

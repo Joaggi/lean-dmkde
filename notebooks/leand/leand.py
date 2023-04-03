@@ -1,16 +1,26 @@
+import os
+import sys
+
+path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
+if path not in sys.path:
+    sys.path.append(path)
+
+
+
 try:
     from initialization import initialization
 except:
     from notebooks.initialization import initialization
 
-parent_path = initialization("qaddemadac", "/home/jagallegom/")
+parent_path = initialization("qaddemadac", path + "/")
 
 
 
 def execution(database):
         settings = {
-            "z_prefix": "v8-only-autoencoder-",
+            "z_experiment": "v10",
             "z_dataset": database,
+            "z_dataset_random_state": 42,
             "z_batch_size": 256,
             "z_threshold": 0.0,
             "z_epochs": 256,
@@ -92,7 +102,7 @@ databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "op
              "pendigits", "pima", "satellite", "satimage-2", "spambase", "vertebral", "vowels", "wbc",
              "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
 
-databases = databases[start::jump]
+#databases = databases[start::jump]
 print(databases)
 
 #databases = ["cover"]

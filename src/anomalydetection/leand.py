@@ -94,8 +94,8 @@ class Leand(keras.Model):
 
   def compute_errors(self, X, probs, reconstruction):
     print("train_step: probs_loss")
-    #probs_loss = -self.alpha * tf.reduce_mean(tf.math.log(probs))
-    probs_loss = self.alpha * tf.reduce_mean(probs * tf.math.log(probs))
+    probs_loss = -self.alpha * tf.reduce_mean(tf.math.log(probs))
+    #probs_loss = self.alpha * tf.reduce_mean(probs * tf.math.log(probs))
 
     print("train_step: reconstruction_loss")
     #tf.print(X.shape)

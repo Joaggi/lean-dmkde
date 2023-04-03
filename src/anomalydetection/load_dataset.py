@@ -17,7 +17,7 @@ def convert_dataset(labels, pos_label, algorithm):
     return y
 
 
-def load_mat_file(path, algorithm):
+def load_mat_file(path, algorithm, random_state=42):
 
     data = scipy.io.loadmat(path)
     features = data["X"]
@@ -27,12 +27,12 @@ def load_mat_file(path, algorithm):
 
     y = convert_dataset(labels, pos_label, algorithm)
 
-    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.25, random_state=42, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.2, random_state=random_state, stratify=y)
 
     return X_train, y_train, X_test, y_test
 
 
-def load_np(path, algorithm):
+def load_np(path, algorithm, random_state=42):
 
     data = np.load(path)
     features = data[:,:-1]
@@ -42,16 +42,16 @@ def load_np(path, algorithm):
 
     y = convert_dataset(labels, pos_label, algorithm)
 
-    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.25, random_state=42, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.2, random_state=random_state, stratify=y)
 
     return X_train, y_train, X_test, y_test
 
 
-def load_dataset(dataset, algorithm):
+def load_dataset(dataset, algorithm, random_state=42):
 
     if dataset=="spambase":
         path = 'data/'+dataset+".npy"
-        return load_np(path, algorithm)
+        return load_np(path, algorithm, random_state)
     else:
         path = 'data/'+dataset+".mat"
-        return load_mat_file(path, algorithm)
+        return load_mat_file(path, algorithm, random_state)
