@@ -1,7 +1,19 @@
+
+import os
+import sys
+
+path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+if path not in sys.path:
+    sys.path.append(path)
+
+
+
 try:
     from initialization import initialization
 except:
     from notebooks.initialization import initialization
+
+parent_path = initialization("qaddemadac", path + "/")
 
 import pandas as pd
 
@@ -17,12 +29,18 @@ import matplotlib.pyplot as plt
 #matplotlib.use('TkAgg')
 import os
 
-algorithms = ["dmkde", "dmkde_sgd", "made", "inverse_maf", "planar_flow", "neural_splines"]
-datasets = ["gmm"]
+algorithms = ["ablat_ae", "ablat_kde", "addmkde", "addmkde_sgd", "covariance", "isolation", 
+              "lake", "leand", "lof", "oneclass", "pca-dmkde",
+              "pyod-alad", "pyod-copod", "pyod-deepsvdd", "pyod-knn", "pyod-loda", "pyod-sogaal", "pyod-sos", 
+              "pyod-vaebayes", "qadvaeff"]
+
+databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "optdigits",
+             "pendigits", "pima", "satellite", "satimage-2", "spambase", "vertebral", "vowels", "wbc",
+             "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
 
 fig, axs = plt.subplots(9, 6, figsize=(80,80))
 
-name_of_experiment =  'conditional-density-experiment'
+name_of_experiment =  'v9'
 
 df = None
 
