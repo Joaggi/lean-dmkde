@@ -3,9 +3,9 @@
 if [ $1 -eq 0 ] 
 then
   #python3 ablat_ae.py 0
-  python3 ablat_kde.py 0
-  python3 addmkde.py 0
-  python3 addmkde_sgd.py 0
+  #python3 ablat_kde.py 0
+  #python3 addmkde.py 0
+  #python3 addmkde_sgd.py 0
   python3 covariance.py 0
   python3 isolation.py 0
   python3 lake.py 0

@@ -15,7 +15,7 @@ def build_model(setting, x_train_rff, x_test_rff):
     sigma = setting["z_sigma"]
     gamma= 1/ (2*sigma**2)
 
-    if setting["z_enable_reconstruction_metrics"]: 
+    if "z_enable_reconstruction_metrics" in setting: 
        dimension=setting["z_adaptive_input_dimension"]+2
     else:
        dimension=setting["z_adaptive_input_dimension"]

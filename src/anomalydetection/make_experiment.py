@@ -1,4 +1,5 @@
-from experiment_dmkde_adp import experiment_dmkde_adp
+from experiment_addmkde import experiment_addmkde
+from experiment_addmkde_sgd import experiment_addmkde_sgd
 from experiment_lof import experiment_lof
 from experiment_oneclass import experiment_oneclass
 from experiment_isolation import experiment_isolation
@@ -23,8 +24,10 @@ def make_experiment(algorithm, X_train, y_train, X_test, y_test, settings, mlflo
         experiment_covariance(X_train, y_train, X_test, y_test, settings, mlflow, best)
     if algorithm == "localoutlier":
         experiment_lof(X_train, y_train, X_test, y_test, settings, mlflow, best)
-    if algorithm == "dmkde_adp":
-        experiment_dmkde_adp(X_train, y_train, X_test, y_test, settings, mlflow, best)
+    if algorithm == "addmkde":
+        experiment_addmkde(X_train, y_train, X_test, y_test, settings, mlflow, best)
+    if algorithm == "addmkde_sgd":
+        experiment_addmkde_sgd(X_train, y_train, X_test, y_test, settings, mlflow, best)
     if algorithm == "lake":
         experiment_lake(X_train, y_train, X_test, y_test, settings, mlflow, best)
     if algorithm.startswith("pyod"):

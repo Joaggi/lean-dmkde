@@ -162,7 +162,7 @@ def experiment_leand(X_train, y_train, X_test, y_test, setting, mlflow, best=Fal
                            for epoch, value in enumerate(adapt_history.history["loss"])] 
                 mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=adapt_loss_history)
                 adapt_val_loss_history = [Metric(key="adapt_val_loss", value=value, step=epoch, timestamp=0)
-                           for epoch, value in enumerate(history.history["val_loss"])] 
+                           for epoch, value in enumerate(adapt_history.history["val_loss"])] 
                 mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=adapt_val_loss_history)
               
 
