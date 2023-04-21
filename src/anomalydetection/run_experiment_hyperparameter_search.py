@@ -14,6 +14,8 @@ def get_best_experiment(mlflow, setting):
     #metrics = ["metrics.aucpr-an", "metrics.aucroc", "metrics.f1_anomalyclass"]
     experiment_id = mlflow.get_experiment_by_name(setting["z_experiment"]).experiment_id
     runs = mlflow_wrapper.search_runs(mlflow, experiment_id, query, ViewType.ACTIVE_ONLY, output_format="pandas")
+
+
     #print([False for i in range(len(metrics))])
     runs.sort_values(metrics, ascending=[False for i in range(len(metrics))], inplace=True)
     best_result = runs.iloc[0]

@@ -32,20 +32,28 @@ def execution(database):
         "z_adaptive_decay_steps": 16,
         "z_adaptive_power": 1,
         "z_adaptive_batch_size": 256,
-        "z_adaptive_epochs": 16,
+        "z_adaptive_epochs": 32,
         "z_adaptive_random_state": None,
         "z_adaptive_num_of_samples": 10000,
+       "z_random_search": True,
+        "z_random_search_random_state": 402,
+        "z_random_search_iter": 100,
+
+        "z_verbose": 1,
         "z_mlflow_server": "local",
     }
 
     prod_settings = {
-        "z_rff_components": [4000], #[1000, 2000, 4000],
-        "z_gamma" : [(2**i) for i in range(-6,6)], #-9,8)]
+        #"z_rff_components": [4000], #[1000, 2000, 4000],
+        "z_rff_components": [16, 32, 64, 128, 256, 512,1024, 2048, 4000],
+        #"z_gamma" : [(2**i) for i in range(-6,6)], #-9,8)]
         "z_num_eigs": [100, 200, 400, 1000],
         "z_eig_epochs": [50, 100, 150],
+        "z_percentile" : [0.05, 0.1, 0.2,0.3, 0.5, 0.8, 1],
+        "z_multiplier" : [0.2, 0.5, 1, 1.5, 2],
         "z_adaptive_fourier_features_enable": ['False', 'True'],
         "z_adaptive_random_samples_enable": ["True", "False"],
-    }
+   }
 
     m, best_params = hyperparameter_search("addmkde_sgd", database, parent_path, prod_settings, settings)
 
