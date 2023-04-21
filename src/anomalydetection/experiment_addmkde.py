@@ -47,12 +47,12 @@ def experiment_addmkde(X_train, y_train, X_test, y_test, setting, mlflow, best=F
             fm_x = rff_layer
             fm_x.trainable = False
 
-            adapt_loss_history = [Metric(key="adapt_loss", value=value, step=epoch, timestamp=0) 
-                       for epoch, value in enumerate(adapt_history.history["loss"])] 
-            mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=adapt_loss_history)
-            adapt_val_loss_history = [Metric(key="adapt_val_loss", value=value, step=epoch, timestamp=0)
-                       for epoch, value in enumerate(adapt_history.history["val_loss"])] 
-            mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=adapt_val_loss_history)
+            ##adapt_loss_history = [Metric(key="adapt_loss", value=value, step=epoch, timestamp=0) 
+            ##           for epoch, value in enumerate(adapt_history.history["loss"])] 
+            ##mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=adapt_loss_history)
+            ##adapt_val_loss_history = [Metric(key="adapt_val_loss", value=value, step=epoch, timestamp=0)
+            ##           for epoch, value in enumerate(adapt_history.history["val_loss"])] 
+            ##mlflow_client.log_batch(run_id=active_run.info.run_id, metrics=adapt_val_loss_history)
 
         else:
             fm_x = adaptive_rff.QFeatureMapAdaptRFF(input_dim=x_train.shape[1], dim=setting["z_rff_components"], gamma=setting["z_gamma"], random_state=setting["z_random_state"])

@@ -76,7 +76,8 @@ def search_runs(mlflow, experiment_ids, filter_string, run_view_type, output_for
         logging.debug("search_runs")
 
         try:
-            return mlflow.search_runs(experiment_ids = experiment_ids, filter_string = filter_string, run_view_type = run_view_type, output_format = output_format)
+            return mlflow.search_runs(experiment_ids = experiment_ids, filter_string = filter_string, 
+                                      run_view_type = run_view_type, output_format = output_format)
         except Exception as Argument:
             logging.exception("Error in search_runs")
             continue

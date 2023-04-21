@@ -36,7 +36,7 @@ def execution(database):
         "z_adaptive_num_of_samples": 10000,
         "z_random_search": True,
         "z_random_search_random_state": 402,
-        "z_random_search_iter": 1,
+        "z_random_search_iter": 0,
         "z_verbose": 1,
 
     }
