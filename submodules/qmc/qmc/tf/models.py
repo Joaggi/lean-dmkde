@@ -24,7 +24,7 @@ class QMClassifier(tf.keras.Model):
         self.cp1 = layers.CrossProduct()
         self.cp2 = layers.CrossProduct()
         self.num_samples = tf.Variable(
-            initial_value=0.,offset
+            initial_value=0.,
             trainable=False     
             )
 

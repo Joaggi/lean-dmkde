@@ -96,7 +96,7 @@ else:
     process_type = '/device:GPU:0'
 
 
-process_type = '/device:CPU:0'
+#process_type = '/device:CPU:0'
 
 with tf.device(process_type):
     for database in databases:
