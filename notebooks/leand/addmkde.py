@@ -50,9 +50,180 @@ def execution(database):
         "z_adaptive_random_samples_enable": ["True", "False"],
     }
 
+    if database == "arrhythmia":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [0.125],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "glass":
+        prod_settings = {
+            "z_rff_components": [4000],
+            "z_gamma" : [4.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "ionosphere":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [1.5],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "letter":
+        prod_settings = {
+            "z_rff_components": [4000],
+            "z_gamma" : [2.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "mnist":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [0.5],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "musk":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [0.25],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "optdigits":
+        prod_settings = {
+            "z_rff_components": [1000],
+            "z_gamma" : [0.5],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "pendigits":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [2.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "pima":
+        prod_settings = {
+            "z_rff_components": [4000],
+            "z_gamma" : [4.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "satellite":
+        prod_settings = {
+            "z_rff_components": [1000],
+            "z_gamma" : [2.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    if database == "satimage-2":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [0.25],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "spambase":
+        prod_settings = {
+            "z_rff_components": [4000],
+            "z_gamma" : [4.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "vertebral":
+        prod_settings = {
+            "z_rff_components": [1000],
+            "z_gamma" : [128.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "vowels":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [4.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "wbc":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [0.015625],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    if database == "breastw":
+        prod_settings = {
+            "z_rff_components": [1000],
+            "z_gamma" : [1.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "wine":
+        prod_settings = {
+            "z_rff_components": [4000],
+            "z_gamma" : [2.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "cardio":
+        prod_settings = {
+            "z_rff_components": [4000],
+            "z_gamma" : [0.001953],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "speech":
+        prod_settings = {
+            "z_rff_components": [1000],
+            "z_gamma" : [64.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "thyroid":
+        prod_settings = {
+            "z_rff_components": [1000],
+            "z_gamma" : [16.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    if database == "annthyroid":
+        prod_settings = {
+            "z_rff_components": [4000],
+            "z_gamma" : [32.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "mammography":
+        prod_settings = {
+            "z_rff_components": [2000],
+            "z_gamma" : [0.0078],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "shuttle":
+        prod_settings = {
+            "z_rff_components": [1000],
+            "z_gamma" : [8.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+    elif database == "cover":
+        prod_settings = {
+            "z_rff_components": [4000],
+            "z_gamma" : [8.0],
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["False"],
+        }
+
+
+
     m, best_params = hyperparameter_search("addmkde", database, parent_path, prod_settings, settings)
 
-    experiment(best_params, m, best=True)
+    #experiment(best_params, m, best=True)
 
 
 from run_experiment_hyperparameter_search import hyperparameter_search
