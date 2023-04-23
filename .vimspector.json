@@ -6,7 +6,7 @@
         "name": "Python: Launch",
         "type": "python",
         "request": "launch",
-        "python": "/home/joag/.cache/pypoetry/virtualenvs/2023-leand-6ufYue35-py3.10/bin/python3.10",
+        "python": "/bin/python3",
         "stopOnEntry": true,
         "console": "externalTerminal",
         "debugOptions": [],

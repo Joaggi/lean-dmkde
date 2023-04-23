@@ -5,6 +5,8 @@ path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../.."))
 if path not in sys.path:
     sys.path.append(path)
 
+
+
 try:
     from initialization import initialization
 except:
@@ -18,9 +20,8 @@ def execution(database):
         settings = {
             "z_experiment": "v10",
             "z_dataset": database,
-            "z_dataset_random_state": 2,
+            "z_dataset_random_state": 42,
             "z_batch_size": 256,
-            "z_threshold": 0.0,
             "z_epochs": 256,
             "z_base_lr": 1e-3,
             "z_end_lr": 1e-7,
@@ -38,7 +39,7 @@ def execution(database):
             "z_adaptive_epochs": 16,
             "z_adaptive_random_state": None,
             "z_adaptive_num_of_samples": 10000,
-            "z_random_search": False,
+            "z_random_search": True,
             "z_random_search_random_state": 402,
             "z_random_search_iter": 50,
             "z_verbose": 1,
@@ -48,17 +49,16 @@ def execution(database):
 
         prod_settings = {
             "z_adaptive_fourier_features_enable": ['False', 'True'],
-            #"z_adaptive_fourier_features_enable": ['True'],
-            #"z_adaptive_fourier_features_enable": ['False'],
             "z_adaptive_random_samples_enable": ["True", "False"],
-            "z_sigma": [2**i for i in range(-7,8)],
-            "z_rff_components": [500,1000,2000],
+            "z_enable_reconstruction_metrics": ['True', 'False'],
+            "z_percentile" : [ 0.2,0.3, 0.5, 0.8],
+            "z_multiplier" : [0.7, 1, 1.3],
+            "z_rff_components": [16, 32, 64, 128, 256, 512,1024,2000],
             "z_max_num_eigs": [0.05,0.1,0.2,0.5,1],
-            "z_sequential": ["(64,20,10,4)","(128,64,32,8)","(128,32,2)","(64,32,16)", "(256,128,32,4)", "(128, 64, 8)", "(256,)", "(128,)", "(64,)", "(8,)", "(64,16)"],
+            "z_sequential": ["(64,20,10,4)","(128,64,32,8)","(128,32,2)","(64,32,16)", "(256,128,32,4)", "(128, 64, 8)", "(256,)", "(128,)", "(64,)", "(8,)", "(64,16)", "(32,8)"],
             #"z_sequential": ["(256,)"],
             #"z_sequential": ["(128, 256, 512, 1024)", "(64,128,256)", "(32,64,256)"],
             "z_alpha": [0, 0.001, 0.01, 0.1, 0.5, 0.9, 0.99, 0.999, 1],
-            "z_enable_reconstruction_metrics": ['True', 'False'],
             #"z_layer" : [tf.keras.layers.LeakyReLU(),tf.keras.layers.tanh()]
             "z_base_lr" : [1e-2, 1e-3],
             "z_adaptive_base_lr" : [1e-2, 1e-3],
@@ -70,15 +70,77 @@ def execution(database):
             "z_kernel_contraint": ["unit_norm", "None"],
         }
 
-        m, best_params = hyperparameter_search("leand", database, parent_path, prod_settings, settings)
-        
-        #best_params["z_epochs"] = 1000
-        #best_params["z_base_lr"] = 1e-4
-        #best_params["z_adaptive_fourier_features_enable"] = "False"
-        #best_params["z_rff_components"] = 1000
-        #best_params["z_autoencoder_is_trainable"] = "False"
+        #prod_settings_arrhythmia={
+        #    "z_adaptive_fourier_features_enable": ['True'],
+        #    "z_adaptive_random_samples_enable": ["True"],
+        #    "z_enable_reconstruction_metrics": ['True'],
+        #    "z_sigma": [0.50],
+        #    "z_adaptive_epochs": [64],
+        #    "z_epochs": [512],
+        #    "z_rff_components": [1000,1000],
+        #    "z_max_num_eigs": [0.5],
+        #    "z_sequential": ["(128,32,2)"],
+        #    "z_alpha": [0.1],
+        #    "z_base_lr" : [1e-3],
+        #    "z_adaptive_base_lr" : [1e-3],
+        #    "z_layer_name" : ["tanh"],
+        #    "z_activity_regularizer_value": [0.01],
+        #    "z_autoencoder_type": ["unconstrained"],
+        #    "z_activity_regularizer": [ None],
+        #    "z_kernel_regularizer": [ "None"],
+        #    "z_kernel_contraint": ["None"],
+        #}
 
-        experiment(best_params, m, best=True)
+        prod_settings_arrhythmia={
+            "z_dataset": "arrhythmia",
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["True"],
+            "z_enable_reconstruction_metrics": ['True'],
+            "z_sigma": [0.26],
+            "z_adaptive_epochs": [128],
+            "z_epochs": [512],
+            "z_rff_components": [32],
+            "z_max_num_eigs": [1],
+            "z_sequential": ["(128,)"],
+            "z_alpha": [0.1],
+            "z_base_lr" : [1e-3],
+            "z_adaptive_base_lr" : [1e-3],
+            "z_layer_name" : ["tanh"],
+            "z_activity_regularizer_value": [0.01],
+            "z_autoencoder_type": ["tied"],
+            "z_activity_regularizer": [ "l1"],
+            "z_kernel_regularizer": [ "weights_orthogonality"],
+            "z_kernel_contraint": ["None"],
+        }
+
+
+        prod_settings_breastw={
+            "z_dataset": "breastw",
+            "z_adaptive_fourier_features_enable": ['True'],
+            "z_adaptive_random_samples_enable": ["True"],
+            "z_enable_reconstruction_metrics": ['True'],
+            "z_sigma": [0.26],
+            "z_adaptive_epochs": [128],
+            "z_epochs": [512],
+            "z_rff_components": [32],
+            "z_max_num_eigs": [1],
+            "z_sequential": ["(128,)"],
+            "z_alpha": [0.1],
+            "z_base_lr" : [1e-3],
+            "z_adaptive_base_lr" : [1e-3],
+            "z_layer_name" : ["tanh"],
+            "z_activity_regularizer_value": [0.01],
+            "z_autoencoder_type": ["tied"],
+            "z_activity_regularizer": [ "l1"],
+            "z_kernel_regularizer": [ "weights_orthogonality"],
+            "z_kernel_contraint": ["None"],
+        }
+
+
+
+        m, best_params = hyperparameter_search("leand", database, parent_path, prod_settings_arrhythmia, settings)
+        
+        #experiment(best_params, m, best=False)
 
 from run_experiment_hyperparameter_search import hyperparameter_search
 from experiment import experiment
@@ -89,9 +151,9 @@ import sys
 print(f"tf version: {tf.__version__}")
 
 
-print(sys.argv)
+print(f"len sys.argv: {sys.argv}")
 
-if len(sys.argv) > 2 and sys.argv[1] != None:
+if len(sys.argv) >= 2 and sys.argv[1] != None:
     start = int(sys.argv[1])
     jump = 3
 
@@ -106,7 +168,7 @@ databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "op
              "pendigits", "pima", "satellite", "satimage-2", "spambase", "vertebral", "vowels", "wbc",
              "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
 
-databases = databases[start::jump]
+#databases = databases[start::jump]
 print(databases)
 
 #databases = ["cover"]
@@ -120,6 +182,9 @@ elif start == 2:
 else:
     process_type = '/device:GPU:0'
 
+process_type = '/device:CPU:0'
+
+print(f"process_type: {process_type}")
 with tf.device(process_type):
     for database in databases:
         execution(database)

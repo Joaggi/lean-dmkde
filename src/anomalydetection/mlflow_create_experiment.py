@@ -7,10 +7,10 @@ import os
 def mlflow_create_experiment(name_of_experiment, server="local", tracking_uri="tracking2.db", registry_uri="registry2.db",):
 
     if server == "local":
-        #mlflow_wrapper.set_tracking_uri(mlflow, "sqlite:////home/jagallegom/mlflow-persistence/" + tracking_uri)
-        #mlflow_wrapper.set_registry_uri(mlflow, "sqlite:////home/jagallegom/mlflow-persistence/" + registry_uri)
-        mlflow_wrapper.set_tracking_uri(mlflow, "sqlite:////Doctorado/qaddemadac/mlflow/" + tracking_uri)
-        mlflow_wrapper.set_registry_uri(mlflow, "sqlite:////Doctorado/qaddemadac/mlflow/" + registry_uri)
+        mlflow_wrapper.set_tracking_uri(mlflow, "sqlite:////home/jagallegom/mlflow-persistence/" + tracking_uri)
+        mlflow_wrapper.set_registry_uri(mlflow, "sqlite:////home/jagallegom/mlflow-persistence/" + registry_uri)
+        #mlflow_wrapper.set_tracking_uri(mlflow, "sqlite:////Doctorado/qaddemadac/mlflow/" + tracking_uri)
+        #mlflow_wrapper.set_registry_uri(mlflow, "sqlite:////Doctorado/qaddemadac/mlflow/" + registry_uri)
         try:
           mlflow_wrapper.create_experiment(mlflow, name_of_experiment, "mlflow/")
         except:

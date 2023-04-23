@@ -27,7 +27,7 @@ def load_mat_file(path, algorithm, random_state=42):
 
     y = convert_dataset(labels, pos_label, algorithm)
 
-    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.2, random_state=random_state, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.25, random_state=random_state, stratify=y)
 
     return X_train, y_train, X_test, y_test
 
@@ -42,7 +42,7 @@ def load_np(path, algorithm, random_state=42):
 
     y = convert_dataset(labels, pos_label, algorithm)
 
-    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.2, random_state=random_state, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(features, y, test_size=0.25, random_state=random_state, stratify=y)
 
     return X_train, y_train, X_test, y_test
 
