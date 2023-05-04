@@ -46,6 +46,128 @@ def execution(database):
         "z_n_neighbors": [2*i for i in range(1,26)],
     }
 
+    if database == "arrhythmia":
+        prod_settings = {
+            "z_nu": [0.07],
+            "z_n_neighbors": [16]
+        }
+    elif database == "glass":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_neighbors": [2]
+        }
+    elif database == "ionosphere":
+        prod_settings = {
+            "z_nu": [0.39],
+            "z_n_neighbors": [6]
+        }
+    elif database == "letter":
+        prod_settings = {
+            "z_nu": [0.03],
+            "z_n_neighbors": [6]
+        }
+    elif database == "mnist":
+        prod_settings = {
+            "z_nu": [0.04],
+            "z_n_neighbors": [50]
+        }
+    elif database == "musk":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_n_neighbors": [20]
+        }
+    elif database == "optdigits":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_neighbors": [10]
+        }
+    elif database == "pendigits":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_neighbors": [44]
+        }
+    elif database == "pima":
+        prod_settings = {
+            "z_nu": [0.30],
+            "z_n_neighbors": [48]
+        }
+    elif database == "satellite":
+        prod_settings = {
+            "z_nu": [0.27],
+            "z_n_neighbors": [24]
+        }
+    elif database == "satimage-2":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_neighbors": [6]
+        }
+    elif database == "spambase":
+        prod_settings = {
+            "z_nu": [0.17],
+            "z_n_neighbors": [40]
+        }
+    elif database == "vertebral":
+        prod_settings = {
+            "z_nu": [0.12],
+            "z_n_neighbors": [8]
+        }
+    elif database == "vowels":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_n_neighbors": [6]
+        }
+    elif database == "wbc":
+        prod_settings = {
+            "z_nu": [0.06],
+            "z_n_neighbors": [48]
+        }
+    elif database == "breastw":
+        prod_settings = {
+            "z_nu": [0.36],
+            "z_n_neighbors": [2]
+        }
+    elif database == "wine":
+        prod_settings = {
+            "z_nu": [0.15],
+            "z_n_neighbors": [24]
+        }
+    elif database == "cardio":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_n_neighbors": [10]
+        }
+    elif database == "speech":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_neighbors": [2]
+        }
+    elif database == "thyroid":
+        prod_settings = {
+            "z_nu": [0.04],
+            "z_n_neighbors": [50]
+        }
+    elif database == "annthyroid":
+        prod_settings = {
+            "z_nu": [0.03],
+            "z_n_neighbors": [48]
+        }
+    elif database == "mammography":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_neighbors": [20]
+        }
+    elif database == "shuttle":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_neighbors": [42]
+        }
+    elif database == "cover":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_neighbors": [48]
+        }
+
+
     m, best_params = hyperparameter_search("localoutlier", database, parent_path, prod_settings, settings)
 
     experiment(best_params, m, best=True)

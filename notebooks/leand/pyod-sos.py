@@ -45,6 +45,123 @@ def execution(database):
         "z_perplexity": [10.0*i for i in range(1,11)],
     }
 
+    if database == "arrhythmia":
+        prod_settings = {
+            "z_nu": [0.12],
+            "z_perplexity": [30.0]
+        }
+    elif database == "glass":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_perplexity": [10.0]
+        }
+    elif database == "ionosphere":
+        prod_settings = {
+            "z_nu": [0.29],
+            "z_perplexity": [10.0]
+        }
+    elif database == "letter":
+        prod_settings = {
+            "z_nu": [0.05],
+            "z_perplexity": [20.0]
+        }
+    elif database == "mnist":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_perplexity": [100.0]
+        }
+    elif database == "musk":
+        prod_settings = {
+            "z_nu": [0.03],
+            "z_perplexity": [100.0]
+        }
+    elif database == "optdigits":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_perplexity": [60.0]
+        }
+    elif database == "pendigits":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_perplexity": [90]
+        }
+    elif database == "pima":
+        prod_settings = {
+            "z_nu": [0.25],
+            "z_perplexity": [40.0]
+        }
+    elif database == "satellite":
+        prod_settings = {
+            "z_nu": [0.35],
+            "z_perplexity": [100.0]
+        }
+    elif database == "satimage-2":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_perplexity": [100.0]
+        }
+    elif database == "spambase":
+        prod_settings = {
+            "z_nu": [0.17],
+            "z_perplexity": [90.0]
+        }
+    elif database == "vertebral":
+        prod_settings = {
+            "z_nu": [0.05],
+            "z_perplexity": [20.0]
+        }
+    elif database == "vowels":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_perplexity": [10.0]
+        }
+    elif database == "wbc":
+        prod_settings = {
+            "z_nu": [0.11],
+            "z_perplexity": [60]
+        }
+    elif database == "breastw":
+        prod_settings = {
+            "z_nu": [0.40],
+            "z_perplexity": [100.0]
+        }
+    elif database == "wine":
+        prod_settings = {
+            "z_nu": [0.15],
+            "z_perplexity": [100.0]
+        }
+    elif database == "cardio":
+        prod_settings = {
+            "z_nu": [0.06],
+            "z_perplexity": [100.0]
+        }
+    elif database == "speech":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_perplexity": [90.0]
+        }
+    elif database == "thyroid":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_perplexity": [30.0]
+        }
+    elif database == "annthyroid":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_perplexity": [10.0]
+        }
+    elif database == "mammography":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_perplexity": [20.0]
+        }
+    elif database == "shuttle":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_perplexity": [100.0]
+        }
+
+
     m, best_params = hyperparameter_search("pyod-sos", database, parent_path, prod_settings, settings)
 
     experiment(best_params, m, best=True)
@@ -76,7 +193,7 @@ else:
 
 databases = ["arrhythmia", "glass", "ionosphere", "letter", "mnist", "musk", "optdigits",
              "pendigits", "pima", "satellite", "satimage-2", "spambase", "vertebral", "vowels", "wbc",
-             "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle", "cover"]
+             "breastw", "wine", "cardio", "speech", "thyroid", "annthyroid", "mammography", "shuttle"]#, "cover"]
 
 #databases = databases[start::jump]
 print(databases)

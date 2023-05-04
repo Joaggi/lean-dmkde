@@ -120,7 +120,7 @@ def execution(database):
             "z_adaptive_fourier_features_enable": ['True'],
             "z_adaptive_random_samples_enable": ["False"],
         }
-    if database == "satimage-2":
+    elif database == "satimage-2":
         prod_settings = {
             "z_rff_components": [2000],
             "z_gamma" : [0.25],
@@ -155,7 +155,7 @@ def execution(database):
             "z_adaptive_fourier_features_enable": ['True'],
             "z_adaptive_random_samples_enable": ["False"],
         }
-    if database == "breastw":
+    elif database == "breastw":
         prod_settings = {
             "z_rff_components": [1000],
             "z_gamma" : [1.0],
@@ -190,7 +190,7 @@ def execution(database):
             "z_adaptive_fourier_features_enable": ['True'],
             "z_adaptive_random_samples_enable": ["False"],
         }
-    if database == "annthyroid":
+    elif database == "annthyroid":
         prod_settings = {
             "z_rff_components": [4000],
             "z_gamma" : [32.0],

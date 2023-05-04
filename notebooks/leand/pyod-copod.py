@@ -34,13 +34,111 @@ def execution(database):
         "z_random_search": True,
         "z_random_search_random_state": 402,
         "z_random_search_iter": 50,
-        "z_verbose": 1,2
+        "z_verbose": 1,#2
         "z_mlflow_server": "local",
     }
 
     prod_settings = {
         "z_nu": nus,
     }
+
+    if database == "arrhythmia":
+        prod_settings = {
+            "z_nu": [0.14]
+        }
+    elif database == "glass":
+        prod_settings = {
+            "z_nu": [0.06]
+        }
+    elif database == "ionosphere":
+        prod_settings = {
+            "z_nu": [0.35]
+        }
+    elif database == "letter":
+        prod_settings = {
+            "z_nu": [0.04]
+        }
+    elif database == "mnist":
+        prod_settings = {
+            "z_nu": [0.04]
+        }
+    elif database == "musk":
+        prod_settings = {
+            "z_nu": [0.02]
+        }
+    elif database == "optdigits":
+        prod_settings = {
+            "z_nu": [0.01]
+        }
+    elif database == "pendigits":
+        prod_settings = {
+            "z_nu": [0.03]
+        }
+    elif database == "pima":
+        prod_settings = {
+            "z_nu": [0.37]
+        }
+    elif database == "satellite":
+        prod_settings = {
+            "z_nu": [0.25]
+        }
+    elif database == "satimage-2":
+        prod_settings = {
+            "z_nu": [0.01]
+        }
+    elif database == "spambase":
+        prod_settings = {
+            "z_nu": [0.21]
+        }
+    elif database == "vertebral":
+        prod_settings = {
+            "z_nu": [0.09]
+        }
+    elif database == "vowels":
+        prod_settings = {
+            "z_nu": [0.01]
+        }
+    elif database == "wbc":
+        prod_settings = {
+            "z_nu": [0.09]
+        }
+    elif database == "breastw":
+        prod_settings = {
+            "z_nu": [0.37]
+        }
+    elif database == "wine":
+        prod_settings = {
+            "z_nu": [0.15]
+        }
+    elif database == "cardio":
+        prod_settings = {
+            "z_nu": [0.11]
+        }
+    elif database == "speech":
+        prod_settings = {
+            "z_nu": [0.01]
+        }
+    elif database == "thyroid":
+        prod_settings = {
+            "z_nu": [0.01]
+        }
+    elif database == "annthyroid":
+        prod_settings = {
+            "z_nu": [0.07]
+        }
+    elif database == "mammography":
+        prod_settings = {
+            "z_nu": [0.01]
+        }
+    elif database == "shuttle":
+        prod_settings = {
+            "z_nu": [0.07]
+        }
+    elif database == "cover":
+        prod_settings = {
+            "z_nu": [0.01]
+        }
+
 
     m, best_params = hyperparameter_search("pyod-copod", database, parent_path, prod_settings, settings)
 
