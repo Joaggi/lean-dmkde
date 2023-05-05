@@ -47,6 +47,154 @@ def execution(database):
         "z_max_samples": [20*i for i in range(1,6)],
     }
 
+
+    if database == "arrhythmia":
+        prod_settings = {
+            "z_nu": [0.08],
+            "z_n_estimators": [100],
+            "z_max_samples": [40],
+        }
+    elif database == "glass":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [100],
+            "z_max_samples": [40],
+        }
+    elif database == "ionosphere":
+        prod_settings = {
+            "z_nu": [0.33],
+            "z_n_estimators": [20],
+            "z_max_samples": [100],
+        }
+    elif database == "letter":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [100],
+            "z_max_samples": [100],
+        }
+    elif database == "mnist":
+        prod_settings = {
+            "z_nu": [0.07],
+            "z_n_estimators": [20],
+            "z_max_samples": [100],
+        }
+    elif database == "musk":
+        prod_settings = {
+            "z_nu": [0.04],
+            "z_n_estimators": [60],
+            "z_max_samples": [80],
+        }
+    elif database == "optdigits":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [40],
+            "z_max_samples": [20],
+        }
+    elif database == "pendigits":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [60],
+            "z_max_samples": [60],
+        }
+    elif database == "pima":
+        prod_settings = {
+            "z_nu": [0.28],
+            "z_n_estimators": [60],
+            "z_max_samples": [60],
+        }
+    elif database == "satellite":
+        prod_settings = {
+            "z_nu": [0.25],
+            "z_n_estimators": [20],
+            "z_max_samples": [20],
+        }
+    elif database == "satimage-2":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [100],
+            "z_max_samples": [100],
+        }
+    elif database == "spambase":
+        prod_settings = {
+            "z_nu": [0.19],
+            "z_n_estimators": [100],
+            "z_max_samples": [20],
+        }
+    elif database == "vertebral":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [60],
+            "z_max_samples": [100],
+        }
+    elif database == "vowels":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [80],
+            "z_max_samples": [40],
+        }
+    elif database == "wbc":
+        prod_settings = {
+            "z_nu": [0.08],
+            "z_n_estimators": [20],
+            "z_max_samples": [80],
+        }
+    elif database == "breastw":
+        prod_settings = {
+            "z_nu": [0.35],
+            "z_n_estimators": [80],
+            "z_max_samples": [40],
+        }
+    elif database == "wine":
+        prod_settings = {
+            "z_nu": [0.06],
+            "z_n_estimators": [20],
+            "z_max_samples": [60],
+        }
+    elif database == "cardio":
+        prod_settings = {
+            "z_nu": [0.15],
+            "z_n_estimators": [100],
+            "z_max_samples": [100],
+        }
+    elif database == "speech":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [20],
+            "z_max_samples": [40],
+        }
+    elif database == "thyroid":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_n_estimators": [40],
+            "z_max_samples": [40],
+        }
+    elif database == "annthyroid":
+        prod_settings = {
+            "z_nu": [0.04],
+            "z_n_estimators": [20],
+            "z_max_samples": [40],
+        }
+    elif database == "mammography":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [20],
+            "z_max_samples": [20],
+        }
+    elif database == "shuttle":
+        prod_settings = {
+            "z_nu": [0.07],
+            "z_n_estimators": [40],
+            "z_max_samples": [80],
+        }
+    elif database == "cover":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_n_estimators": [20],
+            "z_max_samples": [40],
+        }
+
+
+
     m, best_params = hyperparameter_search("isolation", database, parent_path, prod_settings, settings)
 
     experiment(best_params, m, best=True)

@@ -83,7 +83,7 @@ def execution(database):
     elif database == "pendigits":
         prod_settings = {
             "z_nu": [0.01],
-            "z_perplexity": [90]
+            "z_perplexity": [90.0]
         }
     elif database == "pima":
         prod_settings = {
@@ -118,7 +118,7 @@ def execution(database):
     elif database == "wbc":
         prod_settings = {
             "z_nu": [0.11],
-            "z_perplexity": [60]
+            "z_perplexity": [60.0]
         }
     elif database == "breastw":
         prod_settings = {

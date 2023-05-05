@@ -47,6 +47,128 @@ def execution(database):
         "z_gamma" : [2**i for i in range(-10,6)],
     }
 
+    if database == "arrhythmia":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.03125]
+        }
+    elif database == "glass":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.000977]
+        }
+    elif database == "ionosphere":
+        prod_settings = {
+            "z_nu": [0.33],
+            "z_gamma": [0.5]
+        }
+    elif database == "letter":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.000977]
+        }
+    elif database == "mnist":
+        prod_settings = {
+            "z_nu": [0.03],
+            "z_gamma": [0.125]
+        }
+    elif database == "musk":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.000977]
+        }
+    elif database == "optdigits":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.000977]
+        }
+    elif database == "pendigits":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.125]
+        }
+    elif database == "pima":
+        prod_settings = {
+            "z_nu": [0.28],
+            "z_gamma": [0.0625]
+        }
+    elif database == "satellite":
+        prod_settings = {
+            "z_nu": [0.28],
+            "z_gamma": [0.5]
+        }
+    elif database == "satimage-2":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_gamma": [0.00195]
+        }
+    elif database == "spambase":
+        prod_settings = {
+            "z_nu": [0.17],
+            "z_gamma": [0.015625]
+        }
+    elif database == "vertebral":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.000977]
+        }
+    elif database == "vowels":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_gamma": [0.0625]
+        }
+    elif database == "wbc":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.000977]
+        }
+    elif database == "breastw":
+        prod_settings = {
+            "z_nu": [0.29],
+            "z_gamma": [4.0]
+        }
+    elif database == "wine":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.000977]
+        }
+    elif database == "cardio":
+        prod_settings = {
+            "z_nu": [0.10],
+            "z_gamma": [0.0039]
+        }
+    elif database == "speech":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.000977]
+        }
+    elif database == "thyroid":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [4.0]
+        }
+    elif database == "annthyroid":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_gamma": [0.25]
+        }
+    elif database == "mammography":
+        prod_settings = {
+            "z_nu": [0.02],
+            "z_gamma": [0.25]
+        }
+    elif database == "shuttle":
+        prod_settings = {
+            "z_nu": [0.13],
+            "z_gamma": [0.0078]
+        }
+    elif database == "cover":
+        prod_settings = {
+            "z_nu": [0.01],
+            "z_gamma": [0.03125]
+        }
+
+
     m, best_params = hyperparameter_search("oneclass", database, parent_path, prod_settings, settings)
 
     experiment(best_params, m, best=True)

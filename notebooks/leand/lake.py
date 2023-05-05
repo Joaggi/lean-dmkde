@@ -36,6 +36,128 @@ def execution(database):
         "z_enc_dec": [ '(45,35,30)','(20,15,15)','(60,25,20)' ]
     }
 
+    if database == "arrhythmia":
+        prod_settings = {
+            "z_batch_size": [500],
+            "z_enc_dec": ['(45,35,30)']
+        }
+    elif database == "glass":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "ionosphere":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "letter":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(45,35,30)']
+        }
+    elif database == "mnist":
+        prod_settings = {
+            "z_batch_size": [100],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "musk":
+        prod_settings = {
+            "z_batch_size": [500],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "optdigits":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "pendigits":
+        prod_settings = {
+            "z_batch_size": [200],
+            "z_enc_dec": ['(20,15,15)']
+        }
+    elif database == "pima":
+        prod_settings = {
+            "z_batch_size": [200],
+            "z_enc_dec": ['(45,35,30)']
+        }
+    elif database == "satellite":
+        prod_settings = {
+            "z_batch_size": [100],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "satimage-2":
+        prod_settings = {
+            "z_batch_size": [200],
+            "z_enc_dec": ['(20,15,15)']
+        }
+    elif database == "spambase":
+        prod_settings = {
+            "z_batch_size": [100],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "vertebral":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "vowels":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(45,35,30)']
+        }
+    elif database == "wbc":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "breastw":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(45,35,30)']
+        }
+    elif database == "wine":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "cardio":
+        prod_settings = {
+            "z_batch_size": [50],
+            "z_enc_dec": ['(20,15,15)']
+        }
+    elif database == "speech":
+        prod_settings = {
+            "z_batch_size": [500],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "thyroid":
+        prod_settings = {
+            "z_batch_size": [500],
+            "z_enc_dec": ['(20,15,15)']
+        }
+    elif database == "annthyroid":
+        prod_settings = {
+            "z_batch_size": [500],
+            "z_enc_dec": ['(45,35,30)']
+        }
+    elif database == "mammography":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(60,25,20)']
+        }
+    elif database == "shuttle":
+        prod_settings = {
+            "z_batch_size": [200],
+            "z_enc_dec": ['(20,15,15)']
+        }
+    elif database == "cover":
+        prod_settings = {
+            "z_batch_size": [1000],
+            "z_enc_dec": ['(60,25,20)']
+        }
+
+
     m, best_params = hyperparameter_search("lake", database, parent_path, prod_settings, settings)
 
     experiment(best_params, m, best=True)
