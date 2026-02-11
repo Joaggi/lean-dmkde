@@ -50,3 +50,23 @@ tk = "^0.1.0"
 # DVC Installation
 
 !pip install DVC
+
+#Citation 
+
+If you find our work useful in your research, please consider citing our paper: 
+
+@inproceedings{bustos2023ad,
+  title={Ad-dmkde: Anomaly detection through density matrices and fourier features},
+  author={Bustos-Brinez, Oscar A and Gallego-Mejia, Joseph A and Gonz{\'a}lez, Fabio A},
+  booktitle={International Conference on Information Technology \& Systems},
+  pages={327--338},
+  year={2023},
+  organization={Springer}
+}
+
+@article{gallego2022lean,
+  title={LEAN-DMKDE: quantum latent density estimation for anomaly detection},
+  author={Gallego-Mejia, Joseph and Bustos-Brinez, Oscar and Gonz{\'a}lez, Fabio A},
+  journal={arXiv preprint arXiv:2211.08525},
+  year={2022}
+}
