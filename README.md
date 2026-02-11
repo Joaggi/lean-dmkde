@@ -19,6 +19,56 @@ The algorithm can be found in `src/anomalydetection/leand.py` and was developed 
 PyOd and qmc are submodules. 
 
 
+# Setup
+
+
+## Installation
+
+Install Miniconda from [here](https://docs.conda.io/en/latest/miniconda.html) and then run the following commands to create the `learning_with_density_matrices` environment:
+
+```bash
+conda env create -f environment.yml
+
+conda activate learning-with-density-matrices
+```
+
+Next, install the package:
+
+```bash
+pip install -e .
+```
+
+or if you want development dependencies as well:
+
+```bash
+pip install -e .[dev]
+```
+
+
+## Gitsubmodules update
+
+This repository rely on some gitsubmodules. To update them run:
+
+```bash
+git submodule update --init --recursive
+```
+
+## Ml-flow
+
+All the experiments will be saved on Ml-flow in the following path using `sqlite`: `mlflow/`
+
+```bash
+mkdir mlflow/
+```
+
+After running your experiments, you can launch the ml-flow dashboard by running the following command:
+
+```bash
+mlflow ui --port 8080 --backend-store-uri sqlite:///mlflow/tracking.db
+```
+
+
+
 ## Dependencies
 ```
 python = "^3.9"
